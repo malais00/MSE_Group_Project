@@ -1,13 +1,19 @@
 from api import APIClient
 from crawler import Crawler
 from vectorizer import Vectorizer
+from db import MongoDB
 from settings import API_TOKEN, GET_LINKS_API, SEND_LINKS_API, SEND_VECTOR_API
 import time
+import pymongo
 
 def main():
     api_client = APIClient(API_TOKEN)
     crawler = Crawler()
     vectorizer = Vectorizer()
+    mongoDb = MongoDB("mongodb://localhost:27017/")
+
+    # Example usage:
+    mongoDb.savePage("http://example.com")
 
     while True:
         # Step 1: Get links to crawl
