@@ -7,6 +7,7 @@ import random
 import csv
 from datetime import datetime
 import pre_processing
+from langdetect import detect
 
 # Setup logging to output informational messages
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -23,7 +24,7 @@ robots_cache = {}
 
 # Function to fetch page content asynchronously
 async def fetch_url(session, url):
-    headers = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4703.0 Safari/537.36"}
+    headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
         async with session.get(url, headers=headers, timeout=2) as response:
@@ -89,7 +90,7 @@ def is_english(content):
     html_tag = soup.find('html')
     if html_tag:
         lang = html_tag.get('lang') or html_tag.get('xml:lang')
-        if lang:
+        if lang and detect(content) == 'en':
             return lang.startswith('en')
     return True  # Default to True if no lang attribute is found
 
@@ -145,6 +146,6 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
 if __name__ == "__main__":
     seed_url = "https://www.germany.travel/en/cities-culture/tuebingen.html"
     max_depth = 2
-    batch_size = 10
-    max_links = 100
+    batch_size = 100
+    max_links = 1000
     asyncio.run(crawl(seed_url, max_depth, batch_size, max_links))
