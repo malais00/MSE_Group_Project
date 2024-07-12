@@ -6,6 +6,7 @@ import logging
 import random
 import csv
 from datetime import datetime
+import pre_processing
 
 # Setup logging to output informational messages
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,7 +23,7 @@ robots_cache = {}
 
 # Function to fetch page content asynchronously
 async def fetch_url(session, url):
-    headers = {'User-Agent': random.choice(USER_AGENTS)}
+    headers = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4703.0 Safari/537.36"}
     try:
         # Perform an HTTP GET request with a 2-second timeout
         async with session.get(url, headers=headers, timeout=2) as response:
@@ -51,8 +52,9 @@ def save_results(results, filename='crawled_content.csv'):
     with open(filename, 'a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         for url, content, timestamp in results:
-            writer.writerow([url, content, timestamp])
+            writer.writerow([url, pre_processing.preprocess_content(content), timestamp])
     logging.info(f"Batch of {len(results)} entries saved to {filename}")
+
 
 # Function to check if a URL is allowed by robots.txt
 async def is_allowed(session, url):
@@ -93,6 +95,7 @@ def is_english(content):
 
 # Main function to start crawling
 async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
+    pre_processing.preprocess_preparation()
     visited = set()  # Set to keep track of visited URLs
     queue = [(seed_url, 0)]  # Queue to manage URLs to be crawled (with their depth)
     results = []  # List to store the results
