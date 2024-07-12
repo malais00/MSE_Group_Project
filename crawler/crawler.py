@@ -8,6 +8,8 @@ import csv
 from datetime import datetime
 import pre_processing
 from langdetect import detect
+from maxHeap import UrlMaxHeap
+from url_ranker import url_ranker
 
 # Setup logging to output informational messages
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,12 +24,14 @@ USER_AGENTS = [
 # Cache to store robots.txt rules for each root URL
 robots_cache = {}
 
+heap = UrlMaxHeap()
+
 # Function to fetch page content asynchronously
 async def fetch_url(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
-        async with session.get(url, headers=headers, timeout=2) as response:
+        async with session.get(url, headers=headers, timeout=5) as response:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return await response.text()  # Return the content of the response
     except asyncio.TimeoutError:
@@ -105,7 +109,8 @@ def is_english(content):
 async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
     pre_processing.preprocess_preparation()
     visited = set()  # Set to keep track of visited URLs
-    queue = [(seed_url, 0)]  # Queue to manage URLs to be crawled (with their depth)
+    heap = UrlMaxHeap() # Heap to manage URLs to be crawled (with their ranking)
+    heap.add_url(url=seed_url, score=url_ranker(seed_url), depth=0)
     results = []  # List to store the results
     crawled_count = 0  # Counter to keep track of successfully crawled links
 
@@ -116,11 +121,10 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
 
     # Create an aiohttp session
     async with aiohttp.ClientSession() as session:
-        while queue and crawled_count < max_links:
-            url, depth = queue.pop(0)  # Get the next URL and its depth from the queue
-            if depth > max_depth or url in visited:
+        while heap.counter > 0 and crawled_count < max_links:
+            _, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
+            if int(depth) > max_depth or url in visited:
                 continue  # Skip if the URL exceeds max depth or has been visited
-
             if not await is_allowed(session, url):
                 logging.info(f"Blocked by robots.txt: {url}")
                 continue  # Skip if the URL is disallowed by robots.txt
@@ -135,15 +139,15 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
                 links = get_links(content, url)  # Extract links from the content
                 for link in links:
                     if link not in visited:
-                        queue.append((link, depth + 1))  # Add new links to the queue
+                        heap.add_url(url=link, score= url_ranker(link), depth=depth+1) # Add new links to the queue
 
                 # Save batch of results when batch size is reached
                 if len(results) >= batch_size:
                     save_results(results)
                     results.clear()
             else:
-                # Requeue the URL to try again later
-                queue.append((url, depth))
+                # Requeue the URL to try again later, with score penalty so it rankes lower for now
+                heap.add_url(url=url, score=url_ranker(url) - 1, depth=depth)
 
         # Save any remaining results
         if results:
