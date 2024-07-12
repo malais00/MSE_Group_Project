@@ -68,11 +68,18 @@ async def is_allowed(session, url):
         robots_content = await fetch_url(session, robots_url)
         if robots_content:
             rules = []
+            is_global_section = False
+
             for line in robots_content.splitlines():
                 line = line.strip()
-                if line.lower().startswith('disallow:'):
-                    disallow_path = line.split(':', 1)[1].strip()
-                    rules.append(disallow_path)
+                if line.lower().startswith("user-agent:"):
+                    user_agent = line.split(":")[1].strip()
+                    is_global_section = (user_agent == "*")
+                elif is_global_section:
+                    if line.lower().startswith('disallow:'):
+                        disallow_path = line.split(':', 1)[1].strip()
+                        if(disallow_path != ""):
+                            rules.append(disallow_path)
             robots_cache[root_url] = rules
         else:
             robots_cache[root_url] = []
@@ -144,7 +151,7 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
 
 # Example usage
 if __name__ == "__main__":
-    seed_url = "https://www.germany.travel/en/cities-culture/tuebingen.html"
+    seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
     max_depth = 2
     batch_size = 100
     max_links = 1000
