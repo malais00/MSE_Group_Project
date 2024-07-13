@@ -24,14 +24,12 @@ USER_AGENTS = [
 # Cache to store robots.txt rules for each root URL
 robots_cache = {}
 
-heap = UrlMaxHeap()
-
 # Function to fetch page content asynchronously
 async def fetch_url(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
-        async with session.get(url, headers=headers, timeout=5) as response:
+        async with session.get(url, headers=headers, timeout=2) as response:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return await response.text()  # Return the content of the response
     except asyncio.TimeoutError:
@@ -106,11 +104,13 @@ def is_english(content):
     return True  # Default to True if no lang attribute is found
 
 # Main function to start crawling
-async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
+async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100):
     pre_processing.preprocess_preparation()
     visited = set()  # Set to keep track of visited URLs
     heap = UrlMaxHeap() # Heap to manage URLs to be crawled (with their ranking)
-    heap.add_url(url=seed_url, score=url_ranker(seed_url), depth=0)
+
+    for url in seed_urls:
+        heap.add_url(url=url, score=url_ranker(url), depth=0)
     results = []  # List to store the results
     crawled_count = 0  # Counter to keep track of successfully crawled links
 
@@ -155,8 +155,12 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
 
 # Example usage
 if __name__ == "__main__":
-    seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
+
+    with open("../seed.txt") as f:
+        data = f.read()
+    seed_documents = data.split("\n")
+    print(seed_documents)
     max_depth = 2
     batch_size = 100
     max_links = 1000
-    asyncio.run(crawl(seed_url, max_depth, batch_size, max_links))
+    asyncio.run(crawl(seed_documents, max_depth, batch_size, max_links))
