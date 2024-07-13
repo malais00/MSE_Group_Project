@@ -4,12 +4,13 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 import logging
 import random
-import csv
 from datetime import datetime
 import pre_processing
 from langdetect import detect
 from maxHeap import UrlMaxHeap
 from url_ranker import url_ranker
+from db import MongoDB
+import pymongo
 
 # Setup logging to output informational messages
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -52,13 +53,12 @@ def get_links(content, base_url):
             links.add(full_url)
     return links
 
-# Function to save results to a CSV file
-def save_results(results, filename='crawled_content.csv'):
-    with open(filename, 'a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        for url, content, timestamp in results:
-            writer.writerow([url, pre_processing.preprocess_content(content), timestamp])
-    logging.info(f"Batch of {len(results)} entries saved to {filename}")
+# Function to save results to the db file
+def save_results(results):
+    for url, content, timestamp in results:
+        processedContent = pre_processing.preprocess_content(content)
+        mongoDb.savePage(url, processedContent, timestamp)
+    logging.info(f"Batch of {len(results)} entries saved in DB")
 
 
 # Function to check if a URL is allowed by robots.txt
@@ -106,19 +106,13 @@ def is_english(content):
     return True  # Default to True if no lang attribute is found
 
 # Main function to start crawling
-async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
+async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100, visited=set()):
     pre_processing.preprocess_preparation()
-    visited = set()  # Set to keep track of visited URLs
     heap = UrlMaxHeap() # Heap to manage URLs to be crawled (with their ranking)
     heap.add_url(url=seed_url, score=url_ranker(seed_url), depth=0)
     results = []  # List to store the results
     crawled_count = 0  # Counter to keep track of successfully crawled links
-
-    # Initialize CSV file with headers
-    with open("crawled_content.csv", 'w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(["URL", "Content", "Date"])
-
+    
     # Create an aiohttp session
     async with aiohttp.ClientSession() as session:
         while heap.counter > 0 and crawled_count < max_links:
@@ -157,6 +151,8 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100):
 if __name__ == "__main__":
     seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
     max_depth = 2
-    batch_size = 100
+    batch_size = 1
     max_links = 1000
-    asyncio.run(crawl(seed_url, max_depth, batch_size, max_links))
+    mongoDb = MongoDB("mongodb://localhost:27017/")
+    already_crawled = mongoDb.get_already_crawled_urls()
+    asyncio.run(crawl(seed_url, max_depth, batch_size, max_links, already_crawled))
