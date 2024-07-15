@@ -1,6 +1,7 @@
 <template>
     <div>
         <div class="resultDocumentsContainer">
+            <CategoryFilter/>
             <div
                 v-for="doc in documents"
             >
@@ -9,7 +10,7 @@
                         <v-icon size="x-large" style="margin-right: 16px">{{ doc.icon }}</v-icon>
                         <div style="display: flex; flex-direction: column">
                             <h2>{{ doc.title }}</h2>
-                            <a :href="doc.url">{{ doc.url }}</a>
+                            <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
                             <p>{{ doc.preview }}</p>
                         </div>
                     </div>
@@ -20,8 +21,11 @@
 </template>
 
 <script>
+import CategoryFilter from "@/components/CategoryFilter.vue";
+
 export default {
     name: "ResultDocuments",
+    components: {CategoryFilter},
     data() {
         return {
             documents: [
