@@ -108,7 +108,6 @@ def is_english(content):
 # Main function to start crawling
 async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100, visited=set()):
     pre_processing.preprocess_preparation()
-    heap = UrlMaxHeap() # Heap to manage URLs to be crawled (with their ranking)
     heap.add_url(url=seed_url, score=url_ranker(seed_url), depth=0)
     results = []  # List to store the results
     crawled_count = 0  # Counter to keep track of successfully crawled links
@@ -149,10 +148,18 @@ async def crawl(seed_url, max_depth=2, batch_size=10, max_links=100, visited=set
 
 # Example usage
 if __name__ == "__main__":
-    seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
-    max_depth = 2
-    batch_size = 1
-    max_links = 1000
-    mongoDb = MongoDB("mongodb://localhost:27017/")
-    already_crawled = mongoDb.get_already_crawled_urls()
-    asyncio.run(crawl(seed_url, max_depth, batch_size, max_links, already_crawled))
+    try:
+        seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
+        max_depth = 2
+        batch_size = 1
+        max_links = 1000
+        mongoDb = MongoDB("mongodb://localhost:27017/")
+        already_crawled = mongoDb.get_already_crawled_urls()
+        previous_queue = mongoDb.getPreviousQueue()
+        if(previous_queue != []):
+            for entry in previous_queue:
+                heap.add_url(entry[2], entry[0], entry[3])
+        asyncio.run(crawl(seed_url, max_depth, batch_size, max_links, already_crawled))
+    finally:
+        mongoDb.delete_collection("queue")
+        mongoDb.saveQueue(heap.heap)

@@ -27,6 +27,10 @@ class MongoDB:
             self.db.create_collection("crawled", validator={"$jsonSchema": schema})
         except pymongo.errors.CollectionInvalid:
             print("Collection already exists, no need to create collection: crawled.")
+        try:
+            self.db.create_collection("queue")
+        except pymongo.errors.CollectionInvalid:
+            print("Collection already exists, no need to create collection: queue.")
 
         self.createFrontier()
 
@@ -36,6 +40,14 @@ class MongoDB:
         db = self.client.searchEngine
         collection = db.crawled
         collection.insert_one(document)
+
+    def saveQueue(self, queue):
+        for score, counter, url, depth in queue:
+            document = {"score": score, "counter": counter, "url": url, "depth": depth}
+            db = self.client.searchEngine
+            collection = db.queue
+            collection.insert_one(document)
+
 
     def createFrontier(self):
         try:
@@ -62,3 +74,14 @@ class MongoDB:
         for document in cursor:
             urls.add(document["url"])
         return urls
+    
+    def getPreviousQueue(self):
+        queue = []
+        cursor = self.db.queue.find()
+        for document in cursor:
+            queue.append([document["score"], document["counter"], document["url"], document["depth"]])
+        return queue
+    
+    def delete_collection(self, collection_name):
+        self.db[collection_name].drop()
+        print(f"Collection {collection_name} deleted.")
