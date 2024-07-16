@@ -116,8 +116,3 @@ class posting_list():
 
     def get_index_at(self, index):
         return self.plist[index]
-
-invIndex = invertedIndex(mongoDb)
-
-print(invIndex.intersect_search_and(["Tübingen", "Travel", "guide"]))
-print(len(invIndex.intersect_search_or(["Tübingen", "Travel", "guide"])))
