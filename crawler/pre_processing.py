@@ -81,8 +81,11 @@ def lemmatize_text(words):
 def remove_39s(text):
     return re.sub(r'39s', '', text)
 
+def lowercase_text(text):
+    return text.lower()
+
 def preprocess_content(text):
-    pipeline = [cleanMe, remove_punctuation, remove_stopwords, remove_urls, remove_emoji, remove_39s ,nltk.tokenize.word_tokenize, lemmatize_text]
+    pipeline = [cleanMe, remove_punctuation, lowercase_text,remove_stopwords, remove_urls, remove_emoji, remove_39s ,nltk.tokenize.word_tokenize, lemmatize_text]
     for step in pipeline:
         text = step(text)
     return text
