@@ -4,8 +4,6 @@ import numpy as np
 sys.path.append('../')
 from crawler.db import MongoDB
 
-mongoDb = MongoDB("mongodb://localhost:27017/")
-
 class invertedIndex():
     def __init__(self, mongoDb):
         self.index = {}
@@ -116,3 +114,9 @@ class posting_list():
 
     def get_index_at(self, index):
         return self.plist[index]
+
+mongoDb = MongoDB("mongodb://localhost:27017/")
+invIndex = invertedIndex(mongoDb)
+
+print(invIndex.intersect_search_and(["Tübingen", "Travel", "guide"]))
+print(len(invIndex.intersect_search_or(["Tübingen", "Travel", "guide"])))
