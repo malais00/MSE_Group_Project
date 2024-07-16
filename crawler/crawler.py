@@ -11,6 +11,7 @@ from maxHeap import UrlMaxHeap
 from url_ranker import url_ranker
 from db import MongoDB
 import pymongo
+import link_checker
 
 # Setup logging to output informational messages
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -48,7 +49,7 @@ def get_links(content, base_url):
     for tag in soup.find_all('a', href=True):
         href = tag['href']
         full_url = urljoin(base_url, href)  # Construct full URL from relative link
-        if urlparse(full_url).scheme in ['http', 'https']:  # Only consider http and https links
+        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url):  # Only consider http and https links
             links.add(full_url)
     return links
 
@@ -93,19 +94,6 @@ async def is_allowed(session, url):
         if path.startswith(rule):
             return False
     return True
-# only take normal websites (not xml etc..)
-def is_whitelisted(url):
-    # create blacklist of url endings
-    blacklist = [".xml", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".mp4", ".mp3", ".avi", ".mov", 
-                 ".webm", ".flv", ".ogg", ".webp", ".ico", ".css", ".js", ".json", ".xml", ".rss", ".atom", 
-                 ".gz", ".zip", ".rar", ".7z", ".tar", ".iso", ".dmg", ".exe", ".apk", ".torrent", ".woff", 
-                 ".woff2", ".ttf", ".otf", ".eot", ".flac", ".wav", ".zip", ".rar", ".7z", ".tar", ".iso", 
-                 ".dmg", ".exe", ".apk", ".torrent", ".woff", ".woff2", ".ttf", ".otf", ".eot", ".flac", ".wav"]
-    for ending in blacklist:
-        if url.endswith(ending):
-            return False
-    return True
-
 
 # Function to check if the page is in English
 def is_english(content):
@@ -130,6 +118,8 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
     async with aiohttp.ClientSession() as session:
         while heap.counter > 0 and crawled_count < max_links:
             _, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
+            if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url):
+                continue
             if int(depth) > max_depth or url in visited:
                 continue  # Skip if the URL exceeds max depth or has been visited
             if not await is_allowed(session, url):
@@ -137,7 +127,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                 continue  # Skip if the URL is disallowed by robots.txt
             
             content = await fetch_url(session, url)  # Fetch the URL content
-            if content and is_english(content) and is_whitelisted(url):  # Check if the content is in English and if it is whitelisted
+            if content and is_english(content):  # Check if the content is in English and if it is whitelisted
                 visited.add(url)  # Mark URL as visited
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 results.append((url, content, timestamp))  # Add result to the list

@@ -65,11 +65,12 @@ def main():
     rsv_vector = []
     for document in corpus:
         #print(document[0]) # print URL
-        tuple = (document[0], okapi_bm25("food", document[1], corpus))
+        tuple = (document[0], okapi_bm25("food drinks foods drink", document[1], corpus))
         rsv_vector.append(tuple)
     # sort rsv_vector
-    rsv_vector.sort(key=lambda x: x[1], reverse=False)
-    print(rsv_vector)
+    rsv_vector.sort(key=lambda x: x[1], reverse=True)
+    for i in rsv_vector[:10]:
+        print(i)
 
         
 
