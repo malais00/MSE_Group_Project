@@ -93,6 +93,19 @@ async def is_allowed(session, url):
         if path.startswith(rule):
             return False
     return True
+# only take normal websites (not xml etc..)
+def is_whitelisted(url):
+    # create blacklist of url endings
+    blacklist = [".xml", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".mp4", ".mp3", ".avi", ".mov", 
+                 ".webm", ".flv", ".ogg", ".webp", ".ico", ".css", ".js", ".json", ".xml", ".rss", ".atom", 
+                 ".gz", ".zip", ".rar", ".7z", ".tar", ".iso", ".dmg", ".exe", ".apk", ".torrent", ".woff", 
+                 ".woff2", ".ttf", ".otf", ".eot", ".flac", ".wav", ".zip", ".rar", ".7z", ".tar", ".iso", 
+                 ".dmg", ".exe", ".apk", ".torrent", ".woff", ".woff2", ".ttf", ".otf", ".eot", ".flac", ".wav"]
+    for ending in blacklist:
+        if url.endswith(ending):
+            return False
+    return True
+
 
 # Function to check if the page is in English
 def is_english(content):
@@ -122,9 +135,9 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             if not await is_allowed(session, url):
                 logging.info(f"Blocked by robots.txt: {url}")
                 continue  # Skip if the URL is disallowed by robots.txt
-
+            
             content = await fetch_url(session, url)  # Fetch the URL content
-            if content and is_english(content):  # Check if the content is in English
+            if content and is_english(content) and is_whitelisted(url):  # Check if the content is in English and if it is whitelisted
                 visited.add(url)  # Mark URL as visited
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 results.append((url, content, timestamp))  # Add result to the list
@@ -150,7 +163,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
 # Example usage
 if __name__ == "__main__":
     try:
-        with open("../seed.txt") as f:
+        with open("seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
         seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
