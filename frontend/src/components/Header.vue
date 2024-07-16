@@ -13,6 +13,7 @@
                     bg-color="white"
                     class="searchQuery"
                     @click:appendInner="sendSearchQuery"
+                    @keydown.enter="sendSearchQuery"
                 >
                 </v-text-field>
             </div>
@@ -33,7 +34,8 @@ export default {
     },
     methods: {
         sendSearchQuery() {
-
+            this.$emit('search-query', this.query);
+            this.get
         }
     }
 }
