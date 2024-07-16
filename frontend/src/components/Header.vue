@@ -35,7 +35,6 @@ export default {
     methods: {
         sendSearchQuery() {
             this.$emit('search-query', this.query);
-            this.get
         }
     }
 }
