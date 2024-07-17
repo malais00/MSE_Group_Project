@@ -55,9 +55,9 @@ def get_links(content, base_url):
 
 # Function to save results to the db file
 def save_results(results):
-    for url, content, timestamp in results:
+    for url, content, timestamp, links in results:
         processedContent = pre_processing.preprocess_content(content)
-        mongoDb.savePage(url, processedContent, timestamp)
+        mongoDb.savePage(url, processedContent, timestamp, list(links))
     logging.info(f"Batch of {len(results)} entries saved in DB")
 
 
@@ -130,14 +130,14 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             if content and is_english(content):  # Check if the content is in English and if it is whitelisted
                 visited.add(url)  # Mark URL as visited
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                results.append((url, content, timestamp))  # Add result to the list
+                links = get_links(content, url)  # Extract links from the content
+                results.append((url, content, timestamp, links))  # Add result to the list
                 crawled_count += 1  # Increment the crawled count
                 logging.info(f"{crawled_count} / {max_links} | Crawling: {url} (Depth: {depth})")
-                links = get_links(content, url)  # Extract links from the content
                 for link in links:
                     if link not in visited:
                         heap.add_url(url=link, score= url_ranker(link), depth=depth+1) # Add new links to the queue
-
+                        
                 # Save batch of results when batch size is reached
                 if len(results) >= batch_size:
                     save_results(results)
