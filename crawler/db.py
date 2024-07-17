@@ -21,6 +21,12 @@ class MongoDB:
                 "date": {
                     "bsonType": "date",
                 },
+                "links": {
+                    "bsonType": "array",
+                    "items": {
+                         "bsonType": "string"
+                    }
+                },
             }
         }
         try:
@@ -35,8 +41,8 @@ class MongoDB:
         # self.createFrontier()
 
         
-    def savePage(self, url, content, date):
-        document = {"url": url, "content": content, "indexDate": date}
+    def savePage(self, url, content, date, links):
+        document = {"url": url, "content": content, "indexDate": date, "links": links}
         db = self.client.searchEngine
         collection = db.crawled
         collection.insert_one(document)

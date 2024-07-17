@@ -20,6 +20,7 @@ import Header from "@/components/Header";
 import AppFooter from "@/components/AppFooter";
 import * as request from "@/api/request";
 import {checkResponseStatus} from "@/util/check";
+import {preprocessQuery} from "@/util/queryPreprocessing";
 
 export default {
     name: "CategoryFilter",
@@ -113,11 +114,12 @@ export default {
     },
     methods: {
         async searchQuery(query) {
-            console.log(query);
-            const response = await request.getRequest("/query/"+query+"/1");
-            await checkResponseStatus(200, response);
-            const res = await response.json();
-            this.searchResults = res;
+            if(query !== "") {
+                const response = await request.getRequest("/query/"+query+"/1");
+                await checkResponseStatus(200, response);
+                const res = await response.json();
+                this.searchResults = res;
+            }
         },
 
         async getNextDocuments(query, index) {

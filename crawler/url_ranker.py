@@ -1,4 +1,4 @@
-with open("../ranking_keywords.txt", "r") as f:
+with open("ranking_keywords.txt", "r") as f:
     ranking_keywords = f.read().lower().split(",")
 
 def url_ranker(url):
