@@ -82,6 +82,19 @@ class MongoDB:
             queue.append([document["score"], document["counter"], document["url"], document["depth"]])
         return queue
     
+    def getCrawledContent(self):
+        content = []
+        cursor = self.db.crawled.find()
+        for document in cursor:
+            content.append([document["url"], document["content"], document["indexDate"]])
+        return content
+    
     def delete_collection(self, collection_name):
         self.db[collection_name].drop()
         print(f"Collection {collection_name} deleted.")
+
+    def get_documents_stream(self):
+        cursor = self.db.crawled.find({}, {"url": 1, "content": 1})
+        for document in cursor:
+            yield document
+        return None
