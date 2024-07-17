@@ -1,13 +1,15 @@
 import sys
 import math
 import numpy as np
-sys.path.append('../')
-from crawler.db import MongoDB
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../crawler'))
+from db import MongoDB
 
 class invertedIndex():
     def __init__(self, mongoDb):
         self.index = {}
         self.document_mapping = {}
+        self.corpus_size = 0
 
         counter = 0
         for document in mongoDb.get_documents_stream():
@@ -16,15 +18,18 @@ class invertedIndex():
 
             for key in keywords:
                 if(key not in self.index.keys()):
-                    self.index[key] = posting_list(counter)
+                    self.index[key] = posting_list(counter, count=1)
                 else:
-                    if(self.index[key].get_last() != counter):
-                        self.index[key].append(counter)
+                    self.index[key].append(counter, count = 1)
             counter += 1
+            self.corpus_size += 1
 
         for key in self.index.keys():
             self.index[key].generate_skips()
 
+    def get_corpus_size(self):
+        return self.corpus_size
+    
     def intersect_search_and(self, keywords):
         intersected_list = []
 
@@ -38,12 +43,14 @@ class invertedIndex():
 
         indices = [0 for key in keywords_in_index]
 
-        while all([indices[i] < self.index[key].get_length() for i, key in enumerate(keywords)]):
-
+        while all([indices[i] < self.index[key].get_length() for i, key in enumerate(keywords_in_index)]):
+            
+            
             if (len(set([self.index[keywords_in_index[i]].get_index_at(index) for i, index in enumerate(indices)])) <= 1):
-                print(indices[0])
-                print(self.document_mapping[indices[0]])
-                intersected_list += [self.document_mapping[indices[0]]]
+                
+                ind = self.index[keywords_in_index[0]].get_index_at(indices[0])
+
+                intersected_list += [self.document_mapping[ind]]
 
                 for i, _ in enumerate(indices):
                     indices[i] += 1
@@ -81,13 +88,15 @@ class invertedIndex():
         return [self.document_mapping[index] for index in documents]
 
 class posting_list():
-    def __init__(self, index):
+    def __init__(self, index, count):
         self.plist = [index]
         self.skip_pointers = {}
+        self.count = count
 
-    def append(self, index):
+    def append(self, index, count):
         if(index != self.plist[-1]):
             self.plist.append(index)
+        self.count += count
 
     def get_length(self):
         return len(self.plist)
@@ -114,9 +123,12 @@ class posting_list():
 
     def get_index_at(self, index):
         return self.plist[index]
+    
+    def get_document_frequency(self):
+        return self.count
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
-invIndex = invertedIndex(mongoDb)
+#invIndex = invertedIndex(mongoDb)
 
-print(invIndex.intersect_search_and(["Tübingen", "Travel", "guide"]))
-print(len(invIndex.intersect_search_or(["Tübingen", "Travel", "guide"])))
+#print(invIndex.intersect_search_and(["Tübingen", "Travel", "guide"]))
+#print(len(invIndex.intersect_search_or(["Tübingen", "Travel", "guide"])))

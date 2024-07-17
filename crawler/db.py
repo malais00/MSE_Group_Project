@@ -88,10 +88,10 @@ class MongoDB:
             queue.append([document["score"], document["counter"], document["url"], document["depth"]])
         return queue
     
-    def getCrawledContent(self):
+    def getCrawledContentByIndex(self, index):
         content = []
-        cursor = self.db.crawled.find()
-        for document in cursor:
+        for objectId in index:
+            document = self.db.crawled.find_one({"_id": objectId})
             content.append([document["url"], document["content"], document["indexDate"]])
         return content
     
