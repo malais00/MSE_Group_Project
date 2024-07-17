@@ -7,12 +7,14 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../ind
 from index import invertedIndex
 import math
 
+mongoDb = MongoDB("mongodb://localhost:27017/")
+
 # URL, Content, Date
-def getCrawledContent():
-    mongoDb = MongoDB("mongodb://localhost:27017/")
-    #invIndex = invertedIndex(mongoDb)
-    #invIndex.intersect_search_and(["Tübingen", "Travel", "guide"])
-    return mongoDb.getCrawledContent()
+def getCrawledContent(query, iIndex):
+    query_token = query.split()
+    objectIds = iIndex.intersect_search_and(query_token)
+
+    return mongoDb.getCrawledContentByIndex(objectIds)
 
 def term_frequency(query, document):
     score = 0
@@ -23,23 +25,20 @@ def term_frequency(query, document):
                 score += 1
     return score
 
-def document_frequency(query, corpus):
+def document_frequency(query, iIndex):
     score = 0
-    query_tokens = query.split()
-    for document in corpus:
-        for token in query_tokens:
-            if token in document[1]:
-                score += 1
-                break
+    for token in query.split():
+        if(token in iIndex.index.keys()):
+            score += iIndex.index[token].get_document_frequency()
     return score
 
-def inverse_document_frequency(query, corpus):
-    return math.log(len(corpus) / document_frequency(query, corpus))
+def inverse_document_frequency(query, inverted_index):
+    return math.log(inverted_index.get_corpus_size() / document_frequency(query, inverted_index))
 
 # OKAPI BM25
 # b strength of document normalization
 # k term frequency saturation  
-def okapi_bm25(query, document, corpus, b=0.75, k=1.5):
+def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
     if len(document) == 0:
         return 0
     query_tokens = query.split()
@@ -48,24 +47,26 @@ def okapi_bm25(query, document, corpus, b=0.75, k=1.5):
         tf = term_frequency(token, document)
         if tf == 0 or len(document) == 0:
             continue
-        idf = inverse_document_frequency(token, corpus)
-        score += idf * ((tf * (k + 1)) / (tf + k * (1 - b + b * (len(document) / len(corpus)))))
+        idf = inverse_document_frequency(token, inverted_index)
+        score += idf * ((tf * (k + 1)) / (tf + k * (1 - b + b * (len(document) / inverted_index.get_corpus_size()))))
     return score
     
 
 def main():
+    inverted_index = invertedIndex(mongoDb)
+    query = "graveyard"
     #import crawled content
-    corpus = getCrawledContent()
+    corpus = getCrawledContent(query, inverted_index)
     #print(corpus[0])
-    #print(document_frequency("tübingen skip", corpus))
-    #print(term_frequency("tübingen", corpus[0][1]))
-    #print(term_frequency("skip", corpus[0][1]))
-    #print(inverse_document_frequency("tübingen", corpus))
-    #print(inverse_document_frequency("script", corpus))
+
+    print(document_frequency(query, inverted_index))
+    print(term_frequency(query, corpus[0][1]))
+    print(term_frequency(query, corpus[0][1]))
+    print(inverse_document_frequency(query, inverted_index))
     rsv_vector = []
     for document in corpus:
         #print(document[0]) # print URL
-        tuple = (document[0], okapi_bm25("food drinks foods drink", document[1], corpus))
+        tuple = (document[0], okapi_bm25(query, document[1], inverted_index))
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[1], reverse=True)
