@@ -155,7 +155,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
 # Example usage
 if __name__ == "__main__":
     try:
-        with open("seed.txt") as f:
+        with open("../seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
         seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"

@@ -33,7 +33,11 @@ class invertedIndex():
     def intersect_search_and(self, keywords):
         intersected_list = []
 
+        print(self.index.keys())
+
         keywords_in_index = [key for key in keywords if key in self.index.keys()]
+
+        print(keywords_in_index)
 
         if(len(keywords_in_index) == 0):
             return []

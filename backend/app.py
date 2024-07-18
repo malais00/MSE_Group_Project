@@ -21,6 +21,7 @@ def search(query, inverted_index, starting_index):
     #expanded_query = expand_query(preprocessed_query)
     #lemmatized = " ".join(process_query(expanded_query))
     #print(lemmatized)
+    print(preprocessed_query)
 
     resulting_document_urls= ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index)
 
