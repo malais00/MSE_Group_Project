@@ -6,6 +6,7 @@ from nltk.corpus import wordnet
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
+nltk.download('averaged_perceptron_tagger')
 
 def get_wordnet_pos(word):
     """Map POS tag to first character lemmatize() accepts"""

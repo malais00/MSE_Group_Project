@@ -13,7 +13,7 @@ mongoDb = MongoDB("mongodb://localhost:27017/")
 def getCrawledContent(query, iIndex):
     query_token = query.split()
     objectIds = iIndex.intersect_search_and(query_token)
-
+    print(objectIds)
     return mongoDb.getCrawledContentByIndex(objectIds)
 
 def term_frequency(query, document):
@@ -50,7 +50,17 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
         idf = inverse_document_frequency(token, inverted_index)
         score += idf * ((tf * (k + 1)) / (tf + k * (1 - b + b * (len(document) / inverted_index.get_corpus_size()))))
     return score
-    
+
+def ranked_search(query, inverted_index, starting_index):
+    corpus = getCrawledContent(query, inverted_index)
+    rsv_vector = []
+    for document in corpus:
+        tuple = (document[0], okapi_bm25(query, document[1], inverted_index))
+        rsv_vector.append(tuple)
+    # sort rsv_vector
+    rsv_vector.sort(key=lambda x: x[1], reverse=True)
+
+    return rsv_vector[starting_index:starting_index+10]
 
 def main():
     inverted_index = invertedIndex(mongoDb)
