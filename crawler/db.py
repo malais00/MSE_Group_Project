@@ -95,7 +95,7 @@ class MongoDB:
         content = []
         for objectId in index:
             document = self.db.crawled.find_one({"_id": objectId})
-            content.append([document["url"], document["title"], document["content"], document["indexDate"], document["_id"]])
+            content.append([document["url"], document["content"], document["indexDate"], document["_id"]])
         return content
     
     def delete_collection(self, collection_name):
