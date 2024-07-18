@@ -9,7 +9,7 @@ const getCookie = (name) => {
 
 const getRequest = async (path) => {
     // const token = getCookie('token');
-    const response = await fetch('http://' + backendAddress + ':3000' + '/api' + path, {
+    const response = await fetch('http://' + backendAddress + ':5000' + '/api' + path, {
         method: "GET", // *GET, POST, PUT, DELETE, etc.
         headers: {
             "Content-Type": "application/json",
@@ -20,7 +20,7 @@ const getRequest = async (path) => {
 
 const postRequest = async (path, body) => {
     const token = getCookie('token');
-    const response = await fetch('http://' + backendAddress + ':3000' + '/api' + path, {
+    const response = await fetch('http://' + backendAddress + ':5000' + '/api' + path, {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         body: JSON.stringify(body),
         headers: {
@@ -33,7 +33,7 @@ const postRequest = async (path, body) => {
 
 const patchRequest = async (path, body) => {
     const token = getCookie('token');
-    const response = await fetch('http://' + backendAddress + ':3000' + '/api' + path, {
+    const response = await fetch('http://' + backendAddress + ':5000' + '/api' + path, {
         method: "PATCH", // *GET, POST, PUT, DELETE, etc.
         body: JSON.stringify(body),
         headers: {
