@@ -64,7 +64,3 @@ def expand_query(query, threshold=1):
         expanded_query.update(filtered_synonyms)
     print("Expanded query \'" + query + "\' to: " + ' '.join(expanded_query))
     return ' '.join(expanded_query)
-
-query = "Best travel guide for Tübingen"
-expanded_query = expand_query(query)
-lemmatized = process_query(expanded_query)
