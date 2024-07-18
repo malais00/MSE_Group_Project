@@ -26,8 +26,8 @@ def search(query, inverted_index, starting_index):
 
     return_object = []
 
-    for url, rank in resulting_document_urls:
-        return_object.append({"url": url})
+    for url, document_id, rank in resulting_document_urls:
+        return_object.append({"url": url, "document_id": str(document_id)})
 
     return return_object
 
