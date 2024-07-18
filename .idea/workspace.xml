@@ -4,11 +4,8 @@
     <list default="true" id="22406af2-f9da-41e1-a613-3cc1b8d4758a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crawler/crawler.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crawler/url_ranker.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/url_ranker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index/index.py" beforeDir="false" afterPath="$PROJECT_DIR$/index/index.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ranking_keywords.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ranking_keywords.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/seed.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/query_processing/query_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/query_processing/query_processing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -13,7 +13,6 @@ mongoDb = MongoDB("mongodb://localhost:27017/")
 def getCrawledContent(query, iIndex):
     query_token = query.split()
     objectIds = iIndex.intersect_search_and(query_token)
-    print(objectIds)
     return mongoDb.getCrawledContentByIndex(objectIds)
 
 def term_frequency(query, document):
@@ -59,6 +58,7 @@ def ranked_search(query, inverted_index, starting_index):
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[1], reverse=True)
+    print(len(rsv_vector))
 
     return rsv_vector[starting_index:starting_index+10]
 
