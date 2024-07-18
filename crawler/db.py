@@ -12,6 +12,9 @@ class MongoDB:
                 "url": {
                     "bsonType": "string",
                 },
+                "title": {
+                    "bsonType": "string",
+                },
                 "content": {
                     "bsonType": "array",
                     "items": {
@@ -41,8 +44,8 @@ class MongoDB:
         # self.createFrontier()
 
         
-    def savePage(self, url, content, date, links):
-        document = {"url": url, "content": content, "indexDate": date, "links": links}
+    def savePage(self, url, title, content, date, links):
+        document = {"url": url, "title": title, "content": content, "indexDate": date, "links": links}
         db = self.client.searchEngine
         collection = db.crawled
         collection.insert_one(document)
@@ -92,7 +95,7 @@ class MongoDB:
         content = []
         for objectId in index:
             document = self.db.crawled.find_one({"_id": objectId})
-            content.append([document["url"], document["content"], document["indexDate"], document["_id"]])
+            content.append([document["url"], document["title"], document["content"], document["indexDate"], document["_id"]])
         return content
     
     def delete_collection(self, collection_name):

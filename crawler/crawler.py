@@ -53,11 +53,16 @@ def get_links(content, base_url):
             links.add(full_url)
     return links
 
+def get_title(content):
+    soup = BeautifulSoup(content, 'html.parser')
+    title = soup.title.string if soup.title else 'No title found'
+    return title
+
 # Function to save results to the db file
 def save_results(results):
-    for url, content, timestamp, links in results:
+    for url, title, content, timestamp, links in results:
         processedContent = pre_processing.preprocess_content(content)
-        mongoDb.savePage(url, processedContent, timestamp, list(links))
+        mongoDb.savePage(url, title, processedContent, timestamp, list(links))
     logging.info(f"Batch of {len(results)} entries saved in DB")
 
 
@@ -132,8 +137,9 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             if content and is_english(content):  # Check if the content is in English and if it is whitelisted
                 visited.add(url)  # Mark URL as visited
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                title = get_title(content)
                 links = get_links(content, url)  # Extract links from the content
-                results.append((url, content, timestamp, links))  # Add result to the list
+                results.append((url, title, content, timestamp, links))  # Add result to the list
                 crawled_count += 1  # Increment the crawled count
                 logging.info(f"{crawled_count} / {max_links} | Crawling: {url} (Depth: {depth})")
                 for link in links:

@@ -20,8 +20,8 @@ def search(query, inverted_index, starting_index):
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index)
     print(resulting_document_urls)
     return_object = []
-    for url, _id, rank in resulting_document_urls:
-        return_object.append({"url": url, "_id": str(_id)})
+    for url, title, _id, rank in resulting_document_urls:
+        return_object.append({"url": url, "title": title, "_id": str(_id)})
     return return_object
 
 with app.app_context():
