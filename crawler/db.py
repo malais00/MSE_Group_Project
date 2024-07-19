@@ -105,5 +105,6 @@ class MongoDB:
     def get_documents_stream(self):
         cursor = self.db.crawled.find({}, {"url": 1, "content": 1})
         for document in cursor:
-            yield document
+            if "content" in document.keys():
+                yield document
         return None

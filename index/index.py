@@ -35,7 +35,7 @@ class invertedIndex():
 
         keywords_in_index = [key for key in keywords if key in self.index.keys()]
 
-        print(keywords_in_index)
+        #print(keywords_in_index)
 
         if(len(keywords_in_index) == 0):
             return []

@@ -115,7 +115,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
     pre_processing.preprocess_preparation()
     if(heap.counter == 0):
         for url in seed_urls:
-            heap.add_url(url=url, score=url_ranker(url), depth=0)
+            heap.add_url(url=url, score=100, depth=0)
     results = []  # List to store the results
     crawled_count = 0  # Counter to keep track of successfully crawled links
     
@@ -164,7 +164,6 @@ if __name__ == "__main__":
         with open("../seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
-        seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
         max_depth = 2
         batch_size = 1
         max_links = 100
