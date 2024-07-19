@@ -60,9 +60,9 @@ def get_title(content):
 
 # Function to save results to the db file
 def save_results(results):
-    for url, title, content, timestamp, links in results:
+    for url, title, content, timestamp, links, favicon in results:
         processedContent = pre_processing.preprocess_content(content)
-        mongoDb.savePage(url, title, processedContent, timestamp, list(links))
+        mongoDb.savePage(url, title, processedContent, timestamp, list(links), favicon)
     logging.info(f"Batch of {len(results)} entries saved in DB")
 
 
@@ -110,6 +110,16 @@ def is_english(content):
             return lang.startswith('en')
     return True  # Default to True if no lang attribute is found
 
+# Function to get favion link from a page
+def get_favicon(content, url):
+    base_url = f"{url.scheme}://{url.netloc}"
+    soup = BeautifulSoup(content, 'html.parser')
+    favicon_tag = soup.find('link', rel='icon')
+    if favicon_tag:
+        favicon = favicon_tag.get('href')
+        return urljoin(base_url, favicon)
+    return None
+
 # Main function to start crawling
 async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=set()):
     pre_processing.preprocess_preparation()
@@ -139,7 +149,8 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 title = get_title(content)
                 links = get_links(content, url)  # Extract links from the content
-                results.append((url, title, content, timestamp, links))  # Add result to the list
+                favicon = get_favicon(content, urlparse(url))
+                results.append((url, title, content, timestamp, links, favicon))  # Add result to the list
                 crawled_count += 1  # Increment the crawled count
                 logging.info(f"{crawled_count} / {max_links} | Crawling: {url} (Depth: {depth})")
                 for link in links:
@@ -161,11 +172,11 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
 # Example usage
 if __name__ == "__main__":
     try:
-        with open("../seed.txt") as f:
+        with open("./seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
-        max_depth = 2
-        batch_size = 1
+        max_depth = 1000
+        batch_size = 10
         max_links = 100
         mongoDb = MongoDB("mongodb://localhost:27017/")
         already_crawled = mongoDb.get_already_crawled_urls()

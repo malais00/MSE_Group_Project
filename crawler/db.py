@@ -30,6 +30,9 @@ class MongoDB:
                          "bsonType": "string"
                     }
                 },
+                "favicon": {    
+                    "bsonType": "string",
+                },
             }
         }
         try:
@@ -44,8 +47,8 @@ class MongoDB:
         # self.createFrontier()
 
         
-    def savePage(self, url, title, content, date, links):
-        document = {"url": url, "title": title, "content": content, "indexDate": date, "links": links}
+    def savePage(self, url, title, content, date, links, favicon):
+        document = {"url": url, "title": title, "content": content, "indexDate": date, "links": links, "favicon": favicon}
         db = self.client.searchEngine
         collection = db.crawled
         collection.insert_one(document)
