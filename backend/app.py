@@ -55,7 +55,7 @@ def get_spellcheck(query):
     try:
         corrected, misspelled = spellcheck(query)
 
-        return_object = {"corrected_query": corrected, "is misspelled": misspelled}
+        return_object = {"corrected_query": corrected, "misspelled": misspelled}
 
         return jsonify(return_object), 200
     except Exception as e:

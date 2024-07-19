@@ -2,20 +2,43 @@
     <div class="headerContainer">
         <div style="display: flex; flex-direction: row; width: 100%; height: 100%; justify-content: flex-start; align-items: center">
             <h1 class="headline">TübiSearch</h1>
-            <div class="queryContainer">
-                <v-text-field
-                    v-model="query"
-                    variant="solo"
-                    density="compact"
-                    hide-details="hide-details"
-                    append-inner-icon="mdi-magnify"
-                    clearable
-                    bg-color="white"
-                    class="searchQuery"
-                    @click:appendInner="sendSearchQuery"
-                    @keydown.enter="sendSearchQuery"
+            <div
+                class="queryContainer"
+            >
+                <div
+                    style="overflow: hidden"
+                    :style="showSpellchecker ? 'border-radius: 8px 8px 0 0' : 'border-radius: 8px'"
                 >
-                </v-text-field>
+                    <v-text-field
+                        v-model="query"
+                        variant="solo"
+                        density="compact"
+                        hide-details="hide-details"
+                        append-inner-icon="mdi-magnify"
+                        clearable
+                        bg-color="white"
+                        class="searchQuery"
+                        rounded="0"
+                        @click:appendInner="sendSearchQuery"
+                        @keydown.enter="sendSearchQuery"
+                    >
+                    </v-text-field>
+                </div>
+                <div
+                    v-if="showSpellchecker"
+                    class="spellcheckContainer"
+                >
+                    <v-divider></v-divider>
+                    <span @click="sendSpellcheckedQuery" style="cursor: pointer">
+                        Did you mean: {{ correctedQuery }}
+                    </span>
+                    <div
+                        style="width: 100%; display: flex; justify-content: center"
+                        @click="$emit('hide-spellchecker')"
+                    >
+                        <v-icon>mdi-menu-up-outline</v-icon>
+                    </div>
+                </div>
             </div>
             <div class="okapiContainer">
                 <span class="okapiText">Okapi25</span>
@@ -78,6 +101,16 @@
 export default {
     name: "Header",
     props: {
+        showSpellchecker: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        correctedQuery: {
+            type: String,
+            required: false,
+            default: ''
+        }
     },
     data() {
         return {
@@ -92,6 +125,12 @@ export default {
     methods: {
         sendSearchQuery() {
             this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter);
+        },
+        sendSpellcheckedQuery() {
+            this.query = this.correctedQuery;
+            this.$emit('hide-spellchecker');
+            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter);
+
         }
     }
 }
@@ -112,10 +151,13 @@ export default {
 }
 
 .searchQuery {
+    position: relative;
     color: rgb(var(--v-theme-primary));
+    z-index: 2;
 }
 
 .queryContainer {
+    position: relative;
     width: 30%;
 }
 
@@ -149,6 +191,25 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.spellcheckContainer {
+    position: absolute;
+    width: fit-content;
+    min-width: 100%;
+    max-width: 200%;
+    padding: 4px;
+    height: fit-content;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), /* bottom shadow */
+    4px 0 8px rgba(0, 0, 0, 0.2), /* right shadow */
+    -4px 0 8px rgba(0, 0, 0, 0.2); /* left shadow */
+    border-radius: 0 0 8px 8px;
+    z-index: 1;
+    cursor: pointer;
 }
 
 @media only screen and (max-width: 900px) {

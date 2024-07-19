@@ -2,6 +2,10 @@
     <v-app>
         <Header
             @search-query="(query, b_okapi25_parameter, k1_okapi25_parameter) => searchQuery(query, 0, b_okapi25_parameter, k1_okapi25_parameter)"
+            @show-spellchecker="showSpellchecker = true"
+            @hide-spellchecker="showSpellchecker = false"
+            :show-spellchecker="showSpellchecker"
+            :corrected-query="correctedQuery"
         />
 
         <v-main>
@@ -46,6 +50,8 @@ export default {
             snackbarActivator: false,
             snackbarText: '',
             snackbarColor: 'error',
+            showSpellchecker: false,
+            correctedQuery: '',
         }
     },
     methods: {
@@ -55,6 +61,7 @@ export default {
             this.k1_okapi25_parameterReadOnly = k1_okapi25_parameter;
             if(query !== "") {
                 this.loadingResults = true;
+                this.checkSpelling(query);
                 try {
                     const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter);
                     if(await checkResponseStatus(200, response)) {
@@ -74,6 +81,18 @@ export default {
                 } catch (e) {
                     this.showSnackbar('Something went wrong searching for documents.', 'error');
                     this.loadingResults = false;
+                }
+            }
+        },
+
+        async checkSpelling(query) {
+            const response = await request.getRequest("/query/spellcheck/"+query);
+            if(await checkResponseStatus(200, response)) {
+                const res = await response.json();
+                console.log(res)
+                if(res['misspelled']) {
+                    this.showSpellchecker = true;
+                    this.correctedQuery = res['corrected_query'];
                 }
             }
         },

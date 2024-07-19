@@ -7,9 +7,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../ind
 from index import invertedIndex
 import math
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
-import datasets
 
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
