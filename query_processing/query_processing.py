@@ -7,9 +7,12 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../ind
 from index import invertedIndex
 import math
 import numpy as np
-
+from urllib.parse import urlparse
+from page_rank import page_rank
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
+
+page_rank_dict = page_rank()
 
 # Diversification of search results
 def measure_relevance(ranking):
@@ -85,12 +88,17 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
         score += idf * ((tf * (k + 1)) / (tf + k * (1 - b + b * (len(document) / inverted_index.get_corpus_size()))))
     return score
 
-def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi):
+def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0.5, bm_25_weight=0.5):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
 
     for document in corpus:
-        tuple = (document[0], document[1], document[3], document[4], okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi))
+
+        print(page_rank_dict[urlparse(document[0]).netloc], okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi))
+
+        combined_score = pagerank_weight * page_rank_dict[urlparse(document[0]).netloc] + bm_25_weight * okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi)
+
+        tuple = (document[0], document[1], document[3], document[4], combined_score)
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
