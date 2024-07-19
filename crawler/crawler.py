@@ -166,8 +166,8 @@ if __name__ == "__main__":
         seed_documents = data.split("\n")
         seed_url = "https://en.wikivoyage.org/wiki/T%C3%BCbingen"
         max_depth = 2
-        batch_size = 100
-        max_links = 10000
+        batch_size = 1
+        max_links = 100
         mongoDb = MongoDB("mongodb://localhost:27017/")
         already_crawled = mongoDb.get_already_crawled_urls()
         previous_queue = mongoDb.getPreviousQueue()
