@@ -13,7 +13,6 @@ mongoDb = MongoDB("mongodb://localhost:27017/")
 def getCrawledContent(query, iIndex):
     query_token = query.split()
     objectIds = iIndex.intersect_search_and(query_token)
-    print(objectIds)
     return mongoDb.getCrawledContentByIndex(objectIds)
 
 def term_frequency(query, document):
@@ -62,27 +61,26 @@ def ranked_search(query, inverted_index, starting_index):
 
     return rsv_vector[starting_index:starting_index+10]
 
-#def main():
-    #inverted_index = invertedIndex(mongoDb)
-    #query = "graveyard"
-    #import crawled content
-    #corpus = getCrawledContent(query, inverted_index)
+"""def main():
+    inverted_index = invertedIndex(mongoDb)
+    query = "test"
+    corpus = getCrawledContent(query, inverted_index)
     #print(corpus[0])
 
     #print(document_frequency(query, inverted_index))
     #print(term_frequency(query, corpus[0][1]))
     #print(term_frequency(query, corpus[0][1]))
     #print(inverse_document_frequency(query, inverted_index))
-    #rsv_vector = []
-    #for document in corpus:
-        #print(document[0]) # print URL
-        #tuple = (document[0], okapi_bm25(query, document[1], inverted_index))
-        #rsv_vector.append(tuple)
+    rsv_vector = []
+    for document in corpus:
+        print(document[0]) # print URL
+        tuple = (document[0], okapi_bm25(query, document[1], inverted_index))
+        rsv_vector.append(tuple)
     # sort rsv_vector
-    #rsv_vector.sort(key=lambda x: x[1], reverse=True)
-    #for i in rsv_vector[:10]:
-        #print(i)
+    rsv_vector.sort(key=lambda x: x[1], reverse=True)
+    for i in rsv_vector[:10]:
+        print(i)
 
 
 
-#main()
+main()"""
