@@ -94,7 +94,7 @@ def min_max_normalize(scores):
     normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
     return normalized_scores
 
-def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0.5, bm_25_weight=0.5):
+def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
 
@@ -110,14 +110,14 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
 
     for index, document in enumerate(corpus):
 
-        print(normalized_pagerank_scores[index], normalized_okapi_scores[index])
+        print(pagerank_weight * normalized_pagerank_scores[index], (1 - pagerank_weight) * normalized_okapi_scores[index])
 
-        combined_score = pagerank_weight * normalized_pagerank_scores[index] + bm_25_weight * normalized_okapi_scores[index]
+        combined_score = pagerank_weight * normalized_pagerank_scores[index] + (1 - pagerank_weight) * normalized_okapi_scores[index]
 
         tuple = (document[0], document[1], document[3], document[4], combined_score)
         rsv_vector.append(tuple)
     # sort rsv_vector
-    rsv_vector.sort(key=lambda x: x[4], reverse=True)
+    rsv_vector.sort(key=lambda x: x[4], reverse=False)
 
     rsv_percentile = calculate_percentiles(rsv_vector)
     return diversify_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 0.5)
