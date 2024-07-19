@@ -125,7 +125,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             _, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
             if url.endswith('/'):
                 url = url[:-1]
-            if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url):
+            if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url) or link_checker.is_query_page_higher(url, 9):
                 continue
             if int(depth) > max_depth or url in visited:
                 continue  # Skip if the URL exceeds max depth or has been visited
