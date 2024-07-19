@@ -91,7 +91,23 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi):
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
-    return diversify_search_results(rsv_vector[starting_index*10:starting_index*10+10], 10, 0.5)
+    rsv_percentile = calculate_percentiles(rsv_vector)
+    return diversify_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 0.5)
+
+def calculate_percentiles(rsv_vector):
+
+    total_vectors = len(rsv_vector)
+
+    percentiles = []
+    for idx, (url, content, id, title, score) in enumerate(rsv_vector):
+        # Rank starts from 1
+        rank = idx + 1
+        percentile = math.floor((1 - (rank - 1) / total_vectors) * 100)
+        percentiles.append((url, content, id, title, score, percentile))
+
+    return percentiles
+
+
 
 """def main():
     inverted_index = invertedIndex(mongoDb)
