@@ -38,8 +38,9 @@ def search(query, inverted_index, starting_index, b_okapi, k1_okapi):
     preprocessed_query = " ".join(preprocess_content(query))
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi)
     return_object = []
-    for url, content, _id, title, rank in resulting_document_urls:
-        return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank)})
+    for url, content, _id, title, rank, percentile in resulting_document_urls:
+        print(url, rank, percentile)
+        return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank), "percentile": percentile})
     return return_object
 
 def is_float(element):
@@ -63,7 +64,7 @@ def get_spellcheck(query):
     try:
         corrected, misspelled = spellcheck(query)
 
-        return_object = {"corrected_query": corrected, "is misspelled": misspelled}
+        return_object = {"corrected_query": corrected, "misspelled": misspelled}
 
         return jsonify(return_object), 200
     except Exception as e:

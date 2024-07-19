@@ -6,8 +6,13 @@ from db import MongoDB
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../index'))
 from index import invertedIndex
 import math
+import numpy as np
+from urllib.parse import urlparse
+from page_rank import page_rank
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
+
+page_rank_dict = page_rank()
 
 # Diversification of search results
 def measure_relevance(ranking):
@@ -83,17 +88,54 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
         score += idf * ((tf * (k + 1)) / (tf + k * (1 - b + b * (len(document) / inverted_index.get_corpus_size()))))
     return score
 
-def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi):
+def min_max_normalize(scores):
+    min_score = min(scores)
+    max_score = max(scores)
+    normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
+    return normalized_scores
+
+def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
 
+    pagerank_scores = []
+    okapi_scores = []
+
     for document in corpus:
-        tuple = (document[0], document[1], document[3], document[4], okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi))
+        pagerank_scores += [page_rank_dict[urlparse(document[0]).netloc]]
+        okapi_scores += [okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi)]
+
+    normalized_pagerank_scores = min_max_normalize(pagerank_scores)
+    normalized_okapi_scores = min_max_normalize(okapi_scores)
+
+    for index, document in enumerate(corpus):
+
+        print(pagerank_weight * normalized_pagerank_scores[index], (1 - pagerank_weight) * normalized_okapi_scores[index])
+
+        combined_score = pagerank_weight * normalized_pagerank_scores[index] + (1 - pagerank_weight) * normalized_okapi_scores[index]
+
+        tuple = (document[0], document[1], document[3], document[4], combined_score)
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
-    return diversify_search_results(rsv_vector[starting_index*10:starting_index*10+10], 10, 0.5)
+    rsv_percentile = calculate_percentiles(rsv_vector)
+    return diversify_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 0.5)
+
+def calculate_percentiles(rsv_vector):
+
+    total_vectors = len(rsv_vector)
+
+    percentiles = []
+    for idx, (url, content, id, title, score) in enumerate(rsv_vector):
+        # Rank starts from 1
+        rank = idx + 1
+        percentile = math.floor((1 - (rank - 1) / total_vectors) * 100)
+        percentiles.append((url, content, id, title, score, percentile))
+
+    return percentiles
+
+
 
 """def main():
     inverted_index = invertedIndex(mongoDb)
