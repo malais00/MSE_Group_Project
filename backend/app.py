@@ -49,6 +49,7 @@ with app.app_context():
     inverted_index = invertedIndex(mongoDb)
     spell_checker = SpellChecker(language="en", distance= 2)
     keys = list(inverted_index.index.keys())
+    keys = [str(key) for key in keys]
     spell_checker.word_frequency.load_words(keys)
 
 @app.route("/api/query/spellcheck/<string:query>", methods=["GET"])
