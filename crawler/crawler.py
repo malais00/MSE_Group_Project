@@ -27,12 +27,16 @@ USER_AGENTS = [
 robots_cache = {}
 heap = UrlMaxHeap()
 
+# Cache to know how many time a root url has been visited
+visited_count_cache= {}
+penalized_urls = ()
+
 # Function to fetch page content asynchronously
 async def fetch_url(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
-        async with session.get(url, headers=headers, timeout=2) as response:
+        async with session.get(url, headers=headers, timeout=3) as response:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return await response.text()  # Return the content of the response
     except asyncio.TimeoutError:
@@ -60,10 +64,13 @@ def get_title(content):
 
 # Function to save results to the db file
 def save_results(results):
-    for url, title, content, timestamp, links, favicon in results:
-        processedContent = pre_processing.preprocess_content(content)
-        mongoDb.savePage(url, title, processedContent, timestamp, list(links), favicon)
-    logging.info(f"Batch of {len(results)} entries saved in DB")
+    try:
+        for url, title, content, timestamp, links, favicon in results:
+            processedContent = pre_processing.preprocess_content(content)
+            mongoDb.savePage(url, title, processedContent, timestamp, list(links), favicon)
+        logging.info(f"Batch of {len(results)} entries saved in DB")
+    except Exception as e:
+        logging.error(f"Failed to save results in DB: {e}")
 
 
 # Function to check if a URL is allowed by robots.txt
@@ -142,6 +149,15 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             if not await is_allowed(session, url):
                 logging.info(f"Blocked by robots.txt: {url}")
                 continue  # Skip if the URL is disallowed by robots.txt
+
+            #penalize the root url if it has been visited more than 100 times
+            root_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
+            if root_url not in visited_count_cache:
+                visited_count_cache[root_url] = 0
+            visited_count_cache[root_url] += 1
+            if visited_count_cache[root_url] > 100:
+                logging.info(f"Penalized URL: {url}")
+                continue
             
             content = await fetch_url(session, url)  # Fetch the URL content
             if content and is_english(content):  # Check if the content is in English and if it is whitelisted
