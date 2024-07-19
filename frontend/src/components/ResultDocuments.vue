@@ -18,8 +18,7 @@
             >
                 <div class="docContainer">
                     <div style="display: flex; flex-direction: row; align-items: center">
-<!--                        <v-icon size="x-large" style="margin-right: 16px">{{ doc.icon }}</v-icon>-->
-                        <img :src="'https://uni-tuebingen.de/typo3conf/ext/project/Resources/Public/Images/favicon.ico'">
+                        <img alt="" :src="doc.icon ? doc.icon : ''">
                         <div style="display: flex; flex-direction: column">
                             <h2>{{ doc.title }}</h2>
                             <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
