@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="resultDocumentsContainer" @scroll="handleScroll">
-            <CategoryFilter/>
+<!--            <CategoryFilter/>-->
             <div
                 v-if="loadingResults && searchResults.length === 0"
                 class="readyInfo"
@@ -82,7 +82,7 @@ export default {
 
 <style lang="scss">
 .resultDocumentsContainer {
-    overflow: scroll !important;
+    overflow: auto;
     color: rgb(var(--v-theme-font));
     padding: 2%;
     height: 100%;
