@@ -6,6 +6,8 @@ from db import MongoDB
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../index'))
 from index import invertedIndex
 import math
+import numpy as np
+
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
 
@@ -17,6 +19,8 @@ def measure_diversity(unique_words):
     return len(unique_words)
 
 def diversify_search_results(ranking, k, l):
+    if(len(ranking)) == 0:
+        return ranking
     reranked = [ranking[0]]
     unique_words = set(ranking[0][1])
 
