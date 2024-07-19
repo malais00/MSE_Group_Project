@@ -117,7 +117,7 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
         tuple = (document[0], document[1], document[3], document[4], combined_score)
         rsv_vector.append(tuple)
     # sort rsv_vector
-    rsv_vector.sort(key=lambda x: x[4], reverse=False)
+    rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
     rsv_percentile = calculate_percentiles(rsv_vector)
     return diversify_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 0.5)
