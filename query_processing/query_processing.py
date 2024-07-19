@@ -17,6 +17,8 @@ def measure_diversity(unique_words):
     return len(unique_words)
 
 def diversify_search_results(ranking, k, l):
+    if(len(ranking)) == 0:
+        return ranking
     reranked = [ranking[0]]
     unique_words = set(ranking[0][1])
 
