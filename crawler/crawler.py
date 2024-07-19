@@ -115,7 +115,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
     pre_processing.preprocess_preparation()
     if(heap.counter == 0):
         for url in seed_urls:
-            heap.add_url(url=url, score=100, depth=0)
+            heap.add_url(url=url, score=100, depth=1)
     results = []  # List to store the results
     crawled_count = 0  # Counter to keep track of successfully crawled links
     
@@ -144,7 +144,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                 logging.info(f"{crawled_count} / {max_links} | Crawling: {url} (Depth: {depth})")
                 for link in links:
                     if link not in visited:
-                        heap.add_url(url=link, score= url_ranker(link), depth=depth+1) # Add new links to the queue
+                        heap.add_url(url=link, score= url_ranker(link, depth+1), depth=depth+1) # Add new links to the queue
                         
                 # Save batch of results when batch size is reached
                 if len(results) >= batch_size:
@@ -152,7 +152,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                     results.clear()
             else:
                 # Requeue the URL to try again later, with score penalty so it rankes lower for now
-                heap.add_url(url=url, score=url_ranker(url) - 1, depth=depth)
+                heap.add_url(url=url, score=url_ranker(url, depth) - 1, depth=depth)
 
         # Save any remaining results
         if results:

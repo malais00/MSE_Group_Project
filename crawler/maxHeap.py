@@ -8,7 +8,6 @@ class UrlMaxHeap:
         self.counter = 0  # unique sequence count
 
     def add_url(self, url, score, depth):
-        # If the url is already in the heap, mark it as removed in the entry finder
         if url not in self.entry_finder:
 
             # Create a new entry and add it to the heap and entry finder
