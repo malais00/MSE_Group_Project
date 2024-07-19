@@ -1,9 +1,9 @@
 <template>
     <div>
-        <div class="resultDocumentsContainer">
+        <div class="resultDocumentsContainer" @scroll="handleScroll">
             <CategoryFilter/>
             <div
-                v-if="loadingResults"
+                v-if="loadingResults && searchResults.length === 0"
                 class="readyInfo"
             >
                 <v-progress-circular
@@ -31,6 +31,13 @@
                 v-else
                 class="readyInfo"
             >Ready when you are</div>
+            <div v-if="searchResults.length !== 0 && loadingResults">
+                <v-progress-circular
+                    indeterminate
+                    size="64"
+                    color="primary"
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -57,16 +64,28 @@ export default {
         };
     },
     methods: {
-
+        handleScroll(event) {
+            const container = event.target;
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 500 && !this.loadingResults) {
+                this.fetchMoreResults();
+            }
+        },
+        fetchMoreResults() {
+            if (!this.loadingResults && this.searchResults.length !== 0) {
+                console.log("fetching more results: ", this.searchResults.length / 10);
+                this.$emit('fetchMoreResults', this.searchResults.length / 10);
+            }
+        }
     }
 }
 </script>
 
 <style lang="scss">
 .resultDocumentsContainer {
-    overflow: scroll;
+    overflow: scroll !important;
     color: rgb(var(--v-theme-font));
     padding: 2%;
+    height: 100%;
 }
 
 .docContainer {

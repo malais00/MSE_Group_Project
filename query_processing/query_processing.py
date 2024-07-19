@@ -59,7 +59,7 @@ def ranked_search(query, inverted_index, starting_index):
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[1], reverse=False)
 
-    return rsv_vector[starting_index:starting_index+10]
+    return rsv_vector[starting_index*10:starting_index*10+10]
 
 #def main():
     #inverted_index = invertedIndex(mongoDb)

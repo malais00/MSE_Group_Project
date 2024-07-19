@@ -1,14 +1,16 @@
 <template>
     <v-app>
         <Header
-            @search-query="searchQuery"
+            @search-query="(query) => searchQuery(query, 0)"
         />
 
         <v-main>
             <ResultDocuments
                 :searchResults="searchResults"
                 :loading-results="loadingResults"
-                class="resultDocuments"/>
+                class="resultDocuments"
+                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index)"
+            />
         </v-main>
 
         <AppFooter class="footer"/>
@@ -32,16 +34,24 @@ export default {
             AppFooter,
             loadingResults: false,
             searchResults: [],
+            currentQueryReadOnly: '',
         }
     },
     methods: {
-        async searchQuery(query) {
+        async searchQuery(query, index) {
+            this.currentQueryReadOnly = query;
             if(query !== "") {
                 this.loadingResults = true;
-                const response = await request.getRequest("/query/"+query+"/1");
+                const response = await request.getRequest("/query/"+query+"/"+index);
                 await checkResponseStatus(200, response);
                 const res = await response.json();
-                this.searchResults = res;
+                if(this.searchResults.length === 0) {
+                    this.searchResults = res;
+                } else {
+                    this.searchResults = this.searchResults.concat(res);
+                    console.log("new search results: ", res);
+                    console.log(this.searchResults);
+                }
                 this.loadingResults = false;
             }
         },
@@ -77,7 +87,12 @@ export default {
 .footer {
 
 }
-html {
+</style>
 
+<style>
+html, body {
+    overflow: hidden; /* Hide scrollbar on main html and body */
+    height: 100%; /* Ensure the body takes full height */
+    margin: 0; /* Remove default margin */
 }
 </style>
