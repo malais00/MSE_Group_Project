@@ -6,12 +6,12 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../ran
 with open("../ranking_keywords.txt", "r") as f:
     ranking_keywords = f.read().lower().split(",")
 
-def url_ranker(url, depth):
+def url_ranker(url, depth, keyword_score = 0.1):
     url = url.lower()
     score = 1
     for keyword in ranking_keywords:
         if keyword in url:
-            score += 1
+            score += keyword_score
     if(len(url) > 0):
         score = score / (len(url) * depth)
     else:
