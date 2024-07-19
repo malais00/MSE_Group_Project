@@ -42,6 +42,14 @@ def search(query, inverted_index, starting_index, b_okapi, k1_okapi):
         return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank)})
     return return_object
 
+def is_float(element):
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
+
 with app.app_context():
     mongoDb = MongoDB("mongodb://localhost:27017/")
     inverted_index = invertedIndex(mongoDb)
@@ -69,7 +77,7 @@ def get_query(query, index, b_okapi, k1_okapi):
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
     if not int(index) >= 0:
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
-    if not b_okapi.isdigit() or not k1_okapi.isdigit():
+    if (not is_float(b_okapi)) or (not is_float(k1_okapi)):
         return jsonify({"error": "Okapi parameters must be a valid number"}), 400
 
     return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi), k1_okapi=float(k1_okapi))
