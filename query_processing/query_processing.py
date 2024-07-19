@@ -67,30 +67,9 @@ def ranked_search(query, inverted_index, starting_index):
 
     return rsv_vector[starting_index*10:starting_index*10+10]
 
-def find_topic_of_token(token_dataset):
-    ds_train = datasets.load_from_disk("ag_news_preprocessed_train")
-    # this gets the count of words for every document in an array with all the documents words
-    for tokens in token_dataset:
-        # if token is int convert to string
-        for token in tokens:
-            if isinstance(token, int):
-                token = str(token)
-
-    count_vectorizer = CountVectorizer(preprocessor=lambda x: x, tokenizer=lambda x: x, ngram_range=(1, 1))
-    document_word_counts = count_vectorizer.fit_transform(ds_train["text"])
-    # train nb model
-    NB_classifier = MultinomialNB().fit(document_word_counts, ds_train["label"])
-
-    # testing how good model performs
-    predicts = NB_classifier.predict(count_vectorizer.transform(token_dataset))
-    print("Predictions:")
-    with np.printoptions(threshold=np.inf):
-        print(predicts)
-
-    return predicts
-def main():
+"""def main():
     inverted_index = invertedIndex(mongoDb)
-    query = "tübingen"
+    query = "bar"
     corpus = getCrawledContent(query, inverted_index)
     #print(corpus[0])
 
@@ -116,4 +95,4 @@ def main():
 
 
 
-main()
+main()"""
