@@ -6,6 +6,11 @@ from db import MongoDB
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../index'))
 from index import invertedIndex
 import math
+import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+import datasets
+
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
 
@@ -53,17 +58,39 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
 def ranked_search(query, inverted_index, starting_index):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
+
     for document in corpus:
         tuple = (document[0], document[1], document[3], document[4], okapi_bm25(query, document[1], inverted_index))
         rsv_vector.append(tuple)
     # sort rsv_vector
-    rsv_vector.sort(key=lambda x: x[1], reverse=False)
+    rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
     return rsv_vector[starting_index:starting_index+10]
 
-"""def main():
+def find_topic_of_token(token_dataset):
+    ds_train = datasets.load_from_disk("ag_news_preprocessed_train")
+    # this gets the count of words for every document in an array with all the documents words
+    for tokens in token_dataset:
+        # if token is int convert to string
+        for token in tokens:
+            if isinstance(token, int):
+                token = str(token)
+
+    count_vectorizer = CountVectorizer(preprocessor=lambda x: x, tokenizer=lambda x: x, ngram_range=(1, 1))
+    document_word_counts = count_vectorizer.fit_transform(ds_train["text"])
+    # train nb model
+    NB_classifier = MultinomialNB().fit(document_word_counts, ds_train["label"])
+
+    # testing how good model performs
+    predicts = NB_classifier.predict(count_vectorizer.transform(token_dataset))
+    print("Predictions:")
+    with np.printoptions(threshold=np.inf):
+        print(predicts)
+
+    return predicts
+def main():
     inverted_index = invertedIndex(mongoDb)
-    query = "test"
+    query = "tübingen"
     corpus = getCrawledContent(query, inverted_index)
     #print(corpus[0])
 
@@ -72,10 +99,16 @@ def ranked_search(query, inverted_index, starting_index):
     #print(term_frequency(query, corpus[0][1]))
     #print(inverse_document_frequency(query, inverted_index))
     rsv_vector = []
+    token_classification = []
     for document in corpus:
-        print(document[0]) # print URL
+        #print(document[0]) # print URL
         tuple = (document[0], okapi_bm25(query, document[1], inverted_index))
         rsv_vector.append(tuple)
+        token_classification.append(document[1])
+    predicts = find_topic_of_token(token_classification)
+    # add prediction to rsv_vector
+    for i in range(len(rsv_vector)):
+        rsv_vector[i] += (predicts[i],)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[1], reverse=True)
     for i in rsv_vector[:10]:
@@ -83,4 +116,4 @@ def ranked_search(query, inverted_index, starting_index):
 
 
 
-main()"""
+main()
