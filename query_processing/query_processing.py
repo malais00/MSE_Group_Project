@@ -81,12 +81,12 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
         score += idf * ((tf * (k + 1)) / (tf + k * (1 - b + b * (len(document) / inverted_index.get_corpus_size()))))
     return score
 
-def ranked_search(query, inverted_index, starting_index):
+def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
 
     for document in corpus:
-        tuple = (document[0], document[1], document[3], document[4], okapi_bm25(query, document[1], inverted_index))
+        tuple = (document[0], document[1], document[3], document[4], okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi))
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[4], reverse=True)

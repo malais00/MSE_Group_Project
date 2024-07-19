@@ -34,13 +34,21 @@ def spellcheck(query):
     return corrected, misspelled
 
 
-def search(query, inverted_index, starting_index):
+def search(query, inverted_index, starting_index, b_okapi, k1_okapi):
     preprocessed_query = " ".join(preprocess_content(query))
-    resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index)
+    resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi)
     return_object = []
     for url, content, _id, title, rank in resulting_document_urls:
         return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank)})
     return return_object
+
+def is_float(element):
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
 
 with app.app_context():
     mongoDb = MongoDB("mongodb://localhost:27017/")
@@ -69,8 +77,10 @@ def get_query(query, index, b_okapi, k1_okapi):
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
     if not int(index) >= 0:
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
+    if (not is_float(b_okapi)) or (not is_float(k1_okapi)):
+        return jsonify({"error": "Okapi parameters must be a valid number"}), 400
 
-    return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index))
+    return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi), k1_okapi=float(k1_okapi))
     return jsonify(return_json), 200
 
 @app.route("/api/document/details/<string:documentId>", methods=["GET"])
