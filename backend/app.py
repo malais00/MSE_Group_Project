@@ -36,8 +36,6 @@ def spellcheck(query):
 
 def search(query, inverted_index, starting_index):
     preprocessed_query = " ".join(preprocess_content(query))
-    if(starting_index == 1):
-        starting_index = 0
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index)
     return_object = []
     for url, content, _id, title, rank in resulting_document_urls:
