@@ -24,7 +24,7 @@ def build_link_matrix(page_dict):
 def calculate_page_dict():
     page_dict = {}
 
-    for document in mongoDb.get_documents_stream():
+    for document in mongoDb.get_documents_stream_links():
         if("links" in document.keys()):
             outlink_urls = list(set(document["links"]))
         else:

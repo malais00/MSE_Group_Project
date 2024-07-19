@@ -109,3 +109,10 @@ class MongoDB:
             if "content" in document.keys():
                 yield document
         return None
+
+    def get_documents_stream_links(self):
+        cursor = self.db.crawled.find({}, {"url": 1, "links": 1})
+        for document in cursor:
+            if "links" in document.keys():
+                yield document
+        return None
