@@ -24,8 +24,9 @@ def is_query_page_higher(url, max_page=10):
     for q in query:
         if "page" in q:
             match = re.search('page=(\d+)', q)
-            if match.group(1).isdigit() and int(match.group(1)) > max_page:
-                return True
+            if match != None:
+                if match.group(1).isdigit() and int(match.group(1)) > max_page:
+                    return True
     return False
 
     
