@@ -54,7 +54,7 @@ def ranked_search(query, inverted_index, starting_index):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
     for document in corpus:
-        tuple = (document[0], document[1], document[3], okapi_bm25(query, document[1], inverted_index))
+        tuple = (document[0], document[1], document[3], document[4], okapi_bm25(query, document[1], inverted_index))
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[1], reverse=False)
