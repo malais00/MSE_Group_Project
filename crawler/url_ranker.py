@@ -7,7 +7,7 @@ with open("ranking_keywords.txt", "r") as f:
 
 def url_ranker(url):
     url = url.lower()
-    score = 0
+    score = 1
     for keyword in ranking_keywords:
         if keyword in url:
             score += 1

@@ -57,7 +57,7 @@ def ranked_search(query, inverted_index, starting_index):
         tuple = (document[0], document[1], document[3], okapi_bm25(query, document[1], inverted_index))
         rsv_vector.append(tuple)
     # sort rsv_vector
-    rsv_vector.sort(key=lambda x: x[1], reverse=True)
+    rsv_vector.sort(key=lambda x: x[1], reverse=False)
 
     return rsv_vector[starting_index:starting_index+10]
 

@@ -1,1 +1,1 @@
-Tübingen,Tuebingen,Restaurant,Eat,Sight
+tübingen,tuebingen,restaurant,eat,sight

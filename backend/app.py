@@ -17,8 +17,9 @@ CORS(app)
 
 def search(query, inverted_index, starting_index):
     preprocessed_query = " ".join(preprocess_content(query))
+    if(starting_index == 1):
+        starting_index = 0
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index)
-    print(resulting_document_urls)
     return_object = []
     for url, title, _id, rank in resulting_document_urls:
         return_object.append({"url": url, "title": title, "_id": str(_id)})

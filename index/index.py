@@ -35,6 +35,8 @@ class invertedIndex():
 
         keywords_in_index = [key for key in keywords if key in self.index.keys()]
 
+        print(keywords_in_index)
+
         if(len(keywords_in_index) == 0):
             return []
 
@@ -44,9 +46,10 @@ class invertedIndex():
         indices = [0 for key in keywords_in_index]
 
         while all([indices[i] < self.index[key].get_length() for i, key in enumerate(keywords_in_index)]):
-            
-            
-            if (len(set([self.index[keywords_in_index[i]].get_index_at(index) for i, index in enumerate(indices)])) <= 1):
+
+            mapped_indices = [self.index[keywords_in_index[i]].get_index_at(index) for i, index in enumerate(indices)]
+
+            if (len(set(mapped_indices)) <= 1):
                 
                 ind = self.index[keywords_in_index[0]].get_index_at(indices[0])
 
@@ -56,11 +59,13 @@ class invertedIndex():
                     indices[i] += 1
             else:
 
-                lowest_pointer = np.argmin(indices)
+                lowest_pointer = np.argmin(mapped_indices)
 
-                second_lowest = sorted(indices)[1]
+                mapped_indices[lowest_pointer] = np.inf
 
-                if(self.index[keywords_in_index[lowest_pointer]].get_skip(indices[lowest_pointer]) < second_lowest):
+                second_lowest_pointer = np.argmin(mapped_indices)
+
+                if(self.index[keywords_in_index[lowest_pointer]].get_index_at(self.index[keywords_in_index[lowest_pointer]].get_skip(indices[lowest_pointer])) < mapped_indices[second_lowest_pointer]):
                     indices[lowest_pointer] = self.index[keywords_in_index[lowest_pointer]].get_skip(indices[lowest_pointer])
                 else:
                     indices[lowest_pointer] = indices[lowest_pointer] + 1
@@ -108,9 +113,9 @@ class posting_list():
 
     def get_skip(self, index):
         if(index in self.skip_pointers.keys()):
-            return self.skip_pointers[index]
-        else:
-            return index + 1
+            if(self.skip_pointers[index] < len(self.plist)):
+                return self.skip_pointers[index]
+        return index + 1
 
     def to_list(self):
         return self.plist
@@ -122,7 +127,10 @@ class posting_list():
         return self.plist[0]
 
     def get_index_at(self, index):
-        return self.plist[index]
+        if(index < len(self.plist)):
+            return self.plist[index]
+        else:
+            return np.inf
     
     def get_document_frequency(self):
         return self.count
