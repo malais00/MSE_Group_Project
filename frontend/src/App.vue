@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <Header
-            @search-query="(query) => searchQuery(query, 0)"
+            @search-query="(query, b_okapi25_parameter, k1_okapi25_parameter) => searchQuery(query, 0, b_okapi25_parameter, k1_okapi25_parameter)"
         />
 
         <v-main>
@@ -9,7 +9,7 @@
                 :searchResults="searchResults"
                 :loading-results="loadingResults"
                 class="resultDocuments"
-                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index)"
+                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index, b_okapi25_parameterReadOnly, k1_okapi25_parameterReadOnly)"
             />
         </v-main>
 
@@ -23,7 +23,6 @@ import Header from "@/components/Header";
 import AppFooter from "@/components/AppFooter";
 import * as request from "@/api/request";
 import {checkResponseStatus} from "@/util/check";
-import {preprocessQuery} from "@/util/queryPreprocessing";
 
 export default {
     name: "CategoryFilter",
@@ -35,14 +34,18 @@ export default {
             loadingResults: false,
             searchResults: [],
             currentQueryReadOnly: '',
+            b_okapi25_parameterReadOnly: 0.75,
+            k1_okapi25_parameterReadOnly: 1.5,
         }
     },
     methods: {
-        async searchQuery(query, index) {
+        async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter) {
             this.currentQueryReadOnly = query;
+            this.b_okapi25_parameterReadOnly = b_okapi25_parameter;
+            this.k1_okapi25_parameterReadOnly = k1_okapi25_parameter;
             if(query !== "") {
                 this.loadingResults = true;
-                const response = await request.getRequest("/query/"+query+"/"+index);
+                const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter);
                 await checkResponseStatus(200, response);
                 const res = await response.json();
                 if(this.searchResults.length === 0) {

@@ -63,8 +63,8 @@ def get_spellcheck(query):
 
         return jsonify(return_object), 400
 
-@app.route("/api/query/<string:query>/<string:index>", methods=["GET"])
-def get_query(query, index):
+@app.route("/api/query/<string:query>/<string:index>/okapi/<string:b_okapi>/<string:k1_okapi>", methods=["GET"])
+def get_query(query, index, b_okapi, k1_okapi):
     if not index.isdigit():
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
     if not int(index) >= 0:

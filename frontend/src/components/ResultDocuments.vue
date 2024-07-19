@@ -30,7 +30,7 @@
             <div
                 v-else
                 class="readyInfo"
-            >Ready when you are</div>
+            >Let's explore Tübingen</div>
             <div v-if="searchResults.length !== 0 && loadingResults">
                 <v-progress-circular
                     indeterminate
