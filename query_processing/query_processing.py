@@ -92,8 +92,12 @@ def min_max_normalize(scores):
     if(len(scores) > 0):
         min_score = min(scores)
         max_score = max(scores)
-        normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
-        return normalized_scores
+        if(max_score != min_score):
+            normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
+            return normalized_scores
+        else:
+            normalized_scores = [0 for score in scores]
+            return normalized_scores
     else:
         return scores
 
@@ -118,8 +122,6 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
     normalized_okapi_scores = min_max_normalize(okapi_scores)
 
     for index, document in enumerate(corpus):
-
-        print(pagerank_weight * normalized_pagerank_scores[index], (1 - pagerank_weight) * normalized_okapi_scores[index])
 
         combined_score = pagerank_weight * normalized_pagerank_scores[index] + (1 - pagerank_weight) * normalized_okapi_scores[index]
 
