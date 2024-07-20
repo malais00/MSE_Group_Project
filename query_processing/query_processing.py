@@ -111,7 +111,7 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
         if(url in page_rank_dict.keys()):
             pagerank_scores += [page_rank_dict[url]]
         else:
-            pagerank_scores += 0
+            pagerank_scores += [0]
         okapi_scores += [okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi)]
 
     normalized_pagerank_scores = min_max_normalize(pagerank_scores)
