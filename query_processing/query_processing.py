@@ -89,10 +89,14 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
     return score
 
 def min_max_normalize(scores):
-    min_score = min(scores)
-    max_score = max(scores)
-    normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
-    return normalized_scores
+    if(len(scores) > 0):
+        min_score = min(scores)
+        max_score = max(scores)
+        normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
+        return normalized_scores
+    else:
+        return scores
+
 
 def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0):
     corpus = getCrawledContent(query, inverted_index)
