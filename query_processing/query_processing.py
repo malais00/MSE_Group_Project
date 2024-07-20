@@ -177,7 +177,7 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
 
         combined_score = pagerank_weight * normalized_pagerank_scores[index] + (1 - pagerank_weight) * normalized_okapi_scores[index]
 
-        tuple = (document[0], document[1], document[3], document[4], combined_score)
+        tuple = (document[0], document[1], document[3], document[4], combined_score, document[5])
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
@@ -190,11 +190,11 @@ def calculate_percentiles(rsv_vector):
     total_vectors = len(rsv_vector)
 
     percentiles = []
-    for idx, (url, content, id, title, score) in enumerate(rsv_vector):
+    for idx, (url, content, id, title, score, favicon) in enumerate(rsv_vector):
         # Rank starts from 1
         rank = idx + 1
         percentile = math.floor((1 - (rank - 1) / total_vectors) * 100)
-        percentiles.append((url, content, id, title, score, percentile))
+        percentiles.append((url, content, id, title, score, percentile, favicon))
 
     return percentiles
 

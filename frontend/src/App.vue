@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <Header
-            @search-query="(query, b_okapi25_parameter, k1_okapi25_parameter) => searchQuery(query, 0, b_okapi25_parameter, k1_okapi25_parameter)"
+            @search-query="(query, b_okapi25_parameter, k1_okapi25_parameter) => searchQuery(query, 0, b_okapi25_parameter, k1_okapi25_parameter, true)"
             @show-spellchecker="showSpellchecker = true"
             @hide-spellchecker="showSpellchecker = false"
             :show-spellchecker="showSpellchecker"
@@ -12,8 +12,9 @@
             <ResultDocuments
                 :searchResults="searchResults"
                 :loading-results="loadingResults"
+                :maxDocumentsReached="maxDocumentsReached"
                 class="resultDocuments"
-                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index, b_okapi25_parameterReadOnly, k1_okapi25_parameterReadOnly)"
+                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index, b_okapi25_parameterReadOnly, k1_okapi25_parameterReadOnly, false)"
             />
         </v-main>
 
@@ -52,26 +53,30 @@ export default {
             snackbarColor: 'error',
             showSpellchecker: false,
             correctedQuery: '',
+            maxDocumentsReached: false,
         }
     },
     methods: {
-        async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter) {
+        async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter, initialQuery=false) {
+            if(initialQuery) {
+                this.maxDocumentsReached = false;
+            }
             this.currentQueryReadOnly = query;
             this.b_okapi25_parameterReadOnly = b_okapi25_parameter;
             this.k1_okapi25_parameterReadOnly = k1_okapi25_parameter;
             if(query !== "") {
                 this.loadingResults = true;
-                this.checkSpelling(query);
                 try {
                     const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter);
                     if(await checkResponseStatus(200, response)) {
                         const res = await response.json();
+                        if(res.length < 10) {
+                            this.maxDocumentsReached = true;
+                        }
                         if(this.searchResults.length === 0) {
                             this.searchResults = res;
                         } else {
                             this.searchResults = this.searchResults.concat(res);
-                            console.log("new search results: ", res);
-                            console.log(this.searchResults);
                         }
                         this.loadingResults = false;
                     } else {
@@ -82,6 +87,7 @@ export default {
                     this.showSnackbar('Something went wrong searching for documents.', 'error');
                     this.loadingResults = false;
                 }
+                this.checkSpelling(query); // Don't await this for performance reasons
             }
         },
 
@@ -89,7 +95,6 @@ export default {
             const response = await request.getRequest("/query/spellcheck/"+query);
             if(await checkResponseStatus(200, response)) {
                 const res = await response.json();
-                console.log(res)
                 if(res['misspelled']) {
                     this.showSpellchecker = true;
                     this.correctedQuery = res['corrected_query'];
