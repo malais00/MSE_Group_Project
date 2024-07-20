@@ -39,7 +39,6 @@ def search(query, inverted_index, starting_index, b_okapi, k1_okapi):
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi)
     return_object = []
     for url, content, _id, title, rank, percentile, favicon in resulting_document_urls:
-        print(url, rank, favicon, percentile)
         return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank), "percentile": percentile, "favicon": favicon})
     return return_object
 
@@ -72,8 +71,9 @@ def get_spellcheck(query):
 
         return jsonify(return_object), 400
 
-@app.route("/api/query/<string:query>/<string:index>/okapi/<string:b_okapi>/<string:k1_okapi>", methods=["GET"])
-def get_query(query, index, b_okapi, k1_okapi):
+@app.route("/api/query/<string:query>/<string:index>/okapi/<string:b_okapi>/<string:k1_okapi>/<string:diversity_okapi>", methods=["GET"])
+def get_query(query, index, b_okapi, k1_okapi, diversity_okapi):
+    print(diversity_okapi)
     if not index.isdigit():
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
     if not int(index) >= 0:

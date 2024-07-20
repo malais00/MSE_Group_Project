@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <Header
-            @search-query="(query, b_okapi25_parameter, k1_okapi25_parameter) => searchQuery(query, 0, b_okapi25_parameter, k1_okapi25_parameter, true)"
+            @search-query="(query, b_okapi25_parameter, k1_okapi25_parameter, diversity_okapi25_parameter) => searchQuery(query, 0, b_okapi25_parameter, k1_okapi25_parameter, diversity_okapi25_parameter, true)"
             @show-spellchecker="showSpellchecker = true"
             @hide-spellchecker="showSpellchecker = false"
             :show-spellchecker="showSpellchecker"
@@ -14,7 +14,7 @@
                 :loading-results="loadingResults"
                 :maxDocumentsReached="maxDocumentsReached"
                 class="resultDocuments"
-                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index, b_okapi25_parameterReadOnly, k1_okapi25_parameterReadOnly, false)"
+                @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index, b_okapi25_parameterReadOnly, k1_okapi25_parameterReadOnly, diversity_okapi25_parameterReadOnly, false)"
             />
         </v-main>
 
@@ -48,6 +48,7 @@ export default {
             currentQueryReadOnly: '',
             b_okapi25_parameterReadOnly: 0.75,
             k1_okapi25_parameterReadOnly: 1.5,
+            diversity_okapi25_parameterReadOnly: 1.5,
             snackbarActivator: false,
             snackbarText: '',
             snackbarColor: 'error',
@@ -57,17 +58,18 @@ export default {
         }
     },
     methods: {
-        async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter, initialQuery=false) {
+        async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter, diversity_okapi25_parameter, initialQuery=false) {
             if(initialQuery) {
                 this.maxDocumentsReached = false;
             }
             this.currentQueryReadOnly = query;
             this.b_okapi25_parameterReadOnly = b_okapi25_parameter;
             this.k1_okapi25_parameterReadOnly = k1_okapi25_parameter;
+            this.diversity_okapi25_parameterReadOnly = diversity_okapi25_parameter;
             if(query !== "") {
                 this.loadingResults = true;
                 try {
-                    const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter);
+                    const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter+"/"+diversity_okapi25_parameter);
                     if(await checkResponseStatus(200, response)) {
                         const res = await response.json();
                         if(res.length < 10) {
