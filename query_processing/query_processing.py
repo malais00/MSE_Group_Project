@@ -53,7 +53,7 @@ def normalize_fairness(fairness_ratio):
     # Using a sigmoid function to normalize
     return 1 / (1 + np.exp(-fairness_ratio))
 
-def diversify_search_results(ranking, k, l, m):
+def rerank_search_results(ranking, k, l, m):
     if(len(ranking)) == 0:
         return ranking
     reranked = [ranking[0]]
@@ -183,7 +183,7 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
     rsv_percentile = calculate_percentiles(rsv_vector)
-    return diversify_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 1/3, 1/3)
+    return rerank_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 1/3, 1/3)
 
 def calculate_percentiles(rsv_vector):
 
