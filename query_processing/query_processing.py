@@ -27,7 +27,7 @@ def diversify_search_results(ranking, k, l):
     reranked = [ranking[0]]
     unique_words = set(ranking[0][1])
 
-    while len(reranked) < k:
+    while len(reranked) < k and len(reranked) < len(ranking):
         max_score = float('-inf')
         best_doc = None
         for doc in ranking:
