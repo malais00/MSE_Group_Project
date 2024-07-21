@@ -32,7 +32,7 @@ class UrlMaxHeap:
             if url is not self.REMOVED:
                 del self.entry_finder[url]
                 self.counter -= 1
-                return -score, url, depth
+                return score, url, depth
 
         raise KeyError('pop from an empty priority queue')
 

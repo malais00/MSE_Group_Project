@@ -27,16 +27,12 @@ USER_AGENTS = [
 robots_cache = {}
 heap = UrlMaxHeap()
 
-# Cache to know how many time a root url has been visited
-visited_count_cache= {}
-penalized_urls = ()
-
 # Function to fetch page content asynchronously
 async def fetch_url(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
-        async with session.get(url, headers=headers, timeout=3) as response:
+        async with session.get(url, headers=headers, timeout=4) as response:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return await response.text()  # Return the content of the response
     except asyncio.TimeoutError:
@@ -66,6 +62,9 @@ def get_title(content):
 def save_results(results):
     try:
         for url, title, content, timestamp, links, favicon in results:
+            # Check if favicon is present and if not value None is stored
+            if favicon is None:
+                favicon = ""
             processedContent = pre_processing.preprocess_content(content)
             mongoDb.savePage(url, title, processedContent, timestamp, list(links), favicon)
         logging.info(f"Batch of {len(results)} entries saved in DB")
@@ -127,6 +126,30 @@ def get_favicon(content, url):
         return urljoin(base_url, favicon)
     return None
 
+# Function to check if content contains word "tübingen" or "tuebingen"
+def contains_tuebingen(content, url):
+    try:
+        if "tübingen" in content.lower() or "tuebingen" in content.lower():
+            return True
+        else:
+            logging.info(f"Content does not contain 'Tübingen' | URL: {url}")
+        return False
+    except Exception as e:
+        logging.error("Failed to check for 'Tübingen' in content: ", url)
+        return False
+
+# Function to check if a URL has already been crawled in different form
+def is_url_crawled(url, visited):
+    from urllib.parse import urlparse
+    # Parse the given URL
+    parsed_url = urlparse(url)
+    # Normalize the URL to remove "www" if present
+    netloc = parsed_url.netloc.replace("www.", "")
+    normalized_url = parsed_url._replace(netloc=netloc).geturl()
+    # Check if the normalized URL is in the visited set
+    return normalized_url in visited
+
+
 # Main function to start crawling
 async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=set()):
     pre_processing.preprocess_preparation()
@@ -139,9 +162,14 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
     # Create an aiohttp session
     async with aiohttp.ClientSession() as session:
         while heap.counter > 0 and crawled_count < max_links:
-            _, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
+            score, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
             if url.endswith('/'):
                 url = url[:-1]
+            
+            if is_url_crawled(url, visited):
+                continue
+
+
             if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url):
                 continue
             if int(depth) > max_depth or url in visited:
@@ -150,17 +178,10 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                 logging.info(f"Blocked by robots.txt: {url}")
                 continue  # Skip if the URL is disallowed by robots.txt
 
-            #penalize the root url if it has been visited more than 100 times
-            root_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
-            if root_url not in visited_count_cache:
-                visited_count_cache[root_url] = 0
-            visited_count_cache[root_url] += 1
-            if visited_count_cache[root_url] > 100:
-                logging.info(f"Penalized URL: {url}")
-                continue
             
             content = await fetch_url(session, url)  # Fetch the URL content
-            if content and is_english(content):  # Check if the content is in English and if it is whitelisted
+
+            if content and is_english(content) and contains_tuebingen(content, url):  # Check if the content is in English and if it is whitelisted
                 visited.add(url)  # Mark URL as visited
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 title = get_title(content)
@@ -168,7 +189,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                 favicon = get_favicon(content, urlparse(url))
                 results.append((url, title, content, timestamp, links, favicon))  # Add result to the list
                 crawled_count += 1  # Increment the crawled count
-                logging.info(f"{crawled_count} / {max_links} | Crawling: {url} (Depth: {depth})")
+                logging.info(f"{crawled_count} / {max_links} | Crawling: {url} (Depth: {depth}) | Score: {score}")
                 for link in links:
                     if link not in visited:
                         heap.add_url(url=link, score= url_ranker(link, depth+1), depth=depth+1) # Add new links to the queue
@@ -191,9 +212,10 @@ if __name__ == "__main__":
         with open("./seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
+        print(seed_documents)
         max_depth = 1000
         batch_size = 10
-        max_links = 100
+        max_links = 1000000
         mongoDb = MongoDB("mongodb://localhost:27017/")
         already_crawled = mongoDb.get_already_crawled_urls()
         previous_queue = mongoDb.getPreviousQueue()
