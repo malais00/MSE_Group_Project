@@ -34,9 +34,11 @@ def spellcheck(query):
     return corrected, misspelled
 
 
-def search(query, inverted_index, starting_index, b_okapi, k1_okapi):
+def search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight):
     preprocessed_query = " ".join(preprocess_content(query))
-    resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index, starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi)
+    resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index,
+                                starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi,diversity=diversity,
+                                fairness=fairness, pagerank_weight=pagerank_weight)
     return_object = []
     for url, content, _id, title, rank, percentile, favicon in resulting_document_urls:
         return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank), "percentile": percentile, "favicon": favicon})
@@ -71,9 +73,8 @@ def get_spellcheck(query):
 
         return jsonify(return_object), 400
 
-@app.route("/api/query/<string:query>/<string:index>/okapi/<string:b_okapi>/<string:k1_okapi>/<string:diversity_okapi>", methods=["GET"])
-def get_query(query, index, b_okapi, k1_okapi, diversity_okapi):
-    print(diversity_okapi)
+@app.route("/api/query/<string:query>/<string:index>/okapi/<string:b_okapi>/<string:k1_okapi>/<string:diversity_okapi>/<string:fairness_okapi>/<pagerank_weight>", methods=["GET"])
+def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,pagerank_weight):
     if not index.isdigit():
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
     if not int(index) >= 0:
@@ -81,7 +82,8 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi):
     if (not is_float(b_okapi)) or (not is_float(k1_okapi)):
         return jsonify({"error": "Okapi parameters must be a valid number"}), 400
 
-    return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi), k1_okapi=float(k1_okapi))
+    return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi),
+                         k1_okapi=float(k1_okapi), diversity=diversity_okapi, fairness=fairness_okapi, pagerank_weight=pagerank_weight)
     return jsonify(return_json), 200
 
 @app.route("/api/document/details/<string:documentId>", methods=["GET"])

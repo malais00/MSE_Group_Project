@@ -86,9 +86,7 @@ def rerank_search_results(ranking, k, l, m):
 
             fairness_score = normalize_fairness(fairness_metric(new_true_exposure, expected_exposure_list[i]))
 
-            print(diversity, fairness_score, relevance)
-
-            score = l * relevance + (1 - (l + m)) * diversity + m * fairness_score
+            score = (1 - (l + m)) * relevance + l * diversity + m * fairness_score
 
             if score > max_score:
                 max_score = score
@@ -154,7 +152,7 @@ def min_max_normalize(scores):
         return scores
 
 
-def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0):
+def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight=0):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
 
@@ -183,7 +181,7 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
     rsv_percentile = calculate_percentiles(rsv_vector)
-    return rerank_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 1/3, 1/3)
+    return rerank_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, diversity, fairness)
 
 def calculate_percentiles(rsv_vector):
 
