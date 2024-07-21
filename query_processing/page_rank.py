@@ -1,8 +1,10 @@
 import numpy as np
 from db import MongoDB
 from urllib.parse import urlparse
+import os
 
-mongoDb = MongoDB("mongodb://localhost:27017/")
+mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+mongoDb = MongoDB(mongo_uri)
 
 def build_link_matrix(page_dict):
     pages = list(page_dict.keys())

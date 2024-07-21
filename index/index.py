@@ -135,7 +135,11 @@ class posting_list():
     def get_document_frequency(self):
         return self.count
 
-mongoDb = MongoDB("mongodb://localhost:27017/")
+mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+
+print(mongo_uri)
+
+mongoDb = MongoDB(mongo_uri)
 #invIndex = invertedIndex(mongoDb)
 
 #print(invIndex.intersect_search_and(["Tübingen", "Travel", "guide"]))

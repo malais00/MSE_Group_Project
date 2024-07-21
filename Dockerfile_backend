@@ -1,0 +1,17 @@
+FROM continuumio/miniconda3
+
+WORKDIR /server
+
+COPY environment.yml /server/environment.yml
+RUN conda env create -f environment.yml
+SHELL ["conda", "run", "-n", "tuebisearch", "/bin/bash", "-c"]
+
+COPY backend /server/backend
+COPY crawler /server/crawler
+COPY index /server/index
+COPY query_processing /server/query_processing
+
+WORKDIR /server/backend
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "tuebisearch", "python", "app.py"]
+
+EXPOSE 5000

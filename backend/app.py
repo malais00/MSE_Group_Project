@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../crawler'))
 from db import MongoDB
-from pre_processing import preprocess_content
+from pre_processing import preprocess_content, preprocess_preparation
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../index'))
 from index import invertedIndex
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../query_processing'))
@@ -53,7 +53,9 @@ def is_float(element):
 
 
 with app.app_context():
-    mongoDb = MongoDB("mongodb://localhost:27017/")
+    preprocess_preparation()
+    mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+    mongoDb = MongoDB(mongo_uri)
     inverted_index = invertedIndex(mongoDb)
     spell_checker = SpellChecker(language="en", distance= 2)
     keys = list(inverted_index.index.keys())

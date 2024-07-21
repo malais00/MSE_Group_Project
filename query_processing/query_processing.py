@@ -10,7 +10,9 @@ import numpy as np
 from urllib.parse import urlparse
 from page_rank import page_rank
 
-mongoDb = MongoDB("mongodb://localhost:27017/")
+
+mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+mongoDb = MongoDB(mongo_uri)
 
 page_rank_dict = page_rank()
 
