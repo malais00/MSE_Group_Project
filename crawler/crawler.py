@@ -53,7 +53,7 @@ def get_links(content, base_url):
     for tag in soup.find_all('a', href=True):
         href = tag['href']
         full_url = urljoin(base_url, href)  # Construct full URL from relative link
-        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url):  # Only consider http and https links
+        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url) and link_checker.is_query_page_higher(full_url,5):  # Only consider http and https links
             links.add(full_url)
     return links
 
@@ -125,7 +125,7 @@ def get_favicon(content, url):
     if favicon_tag:
         favicon = favicon_tag.get('href')
         return urljoin(base_url, favicon)
-    return None
+    return ""
 
 # Main function to start crawling
 async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=set()):
@@ -142,7 +142,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             _, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
             if url.endswith('/'):
                 url = url[:-1]
-            if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url) or link_checker.is_query_page_higher(url, 9):
+            if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url):
                 continue
             if int(depth) > max_depth or url in visited:
                 continue  # Skip if the URL exceeds max depth or has been visited
@@ -150,14 +150,7 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
                 logging.info(f"Blocked by robots.txt: {url}")
                 continue  # Skip if the URL is disallowed by robots.txt
 
-            #penalize the root url if it has been visited more than 100 times
-            root_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
-            if root_url not in visited_count_cache:
-                visited_count_cache[root_url] = 0
-            visited_count_cache[root_url] += 1
-            if visited_count_cache[root_url] > 100:
-                logging.info(f"Penalized URL: {url}")
-                continue
+
             
             content = await fetch_url(session, url)  # Fetch the URL content
             if content and is_english(content):  # Check if the content is in English and if it is whitelisted
@@ -191,9 +184,9 @@ if __name__ == "__main__":
         with open("./seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
-        max_depth = 1000
-        batch_size = 10
-        max_links = 100
+        max_depth = 10
+        batch_size = 100
+        max_links = 100000
         mongoDb = MongoDB("mongodb://localhost:27017/")
         already_crawled = mongoDb.get_already_crawled_urls()
         previous_queue = mongoDb.getPreviousQueue()
