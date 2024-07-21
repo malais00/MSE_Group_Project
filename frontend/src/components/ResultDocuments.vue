@@ -3,7 +3,7 @@
         <div class="resultDocumentsContainer" @scroll="handleScroll">
 <!--            <CategoryFilter/>-->
             <div
-                v-if="loadingResults && searchResults.length === 0"
+                v-if="loadingResults && searchResults.length === 0 && !maxDocumentsReached"
                 class="readyInfo"
             >
                 <v-progress-circular
@@ -18,9 +18,11 @@
             >
                 <div class="docContainer">
                     <div style="display: flex; flex-direction: row; align-items: center">
-                        <img alt="" :src="doc.icon ? doc.icon : ''">
                         <div style="display: flex; flex-direction: column">
-                            <h2>{{ doc.title }}</h2>
+                            <div style="display: flex; flex-direction: row; align-items: center">
+                                <img class="faviconDoc" alt="" :src="doc.favicon ? doc.favicon : ''">
+                                <h2>{{ doc.title }}</h2>
+                            </div>
                             <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
                             <p>{{ doc.preview }}</p>
                         </div>
@@ -31,7 +33,7 @@
                 v-else
                 class="readyInfo"
             >Let's explore Tübingen</div>
-            <div v-if="searchResults.length !== 0 && loadingResults">
+            <div v-if="searchResults.length !== 0 && loadingResults && !maxDocumentsReached">
                 <v-progress-circular
                     indeterminate
                     size="64"
@@ -56,6 +58,10 @@ export default {
         loadingResults: {
             type: Boolean,
             required: true
+        },
+        maxDocumentsReached: {
+            type: Boolean,
+            required: true
         }
     },
     data() {
@@ -65,6 +71,9 @@ export default {
     },
     methods: {
         handleScroll(event) {
+            if(this.maxDocumentsReached) {
+                return;
+            }
             const container = event.target;
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 500 && !this.loadingResults) {
                 this.fetchMoreResults();
@@ -100,5 +109,11 @@ export default {
     align-items: center;
     height: 70vh;
     font-size: 2em;
+}
+
+.faviconDoc {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px
 }
 </style>

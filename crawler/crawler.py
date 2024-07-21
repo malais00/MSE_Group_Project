@@ -49,7 +49,7 @@ def get_links(content, base_url):
     for tag in soup.find_all('a', href=True):
         href = tag['href']
         full_url = urljoin(base_url, href)  # Construct full URL from relative link
-        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url):  # Only consider http and https links
+        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url) and not link_checker.is_query_page_higher(full_url,5):  # Only consider http and https links
             links.add(full_url)
     return links
 
@@ -124,7 +124,7 @@ def get_favicon(content, url):
     if favicon_tag:
         favicon = favicon_tag.get('href')
         return urljoin(base_url, favicon)
-    return None
+    return ""
 
 # Function to check if content contains word "tübingen" or "tuebingen"
 def contains_tuebingen(content, url):

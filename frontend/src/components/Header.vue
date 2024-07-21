@@ -40,59 +40,101 @@
                     </div>
                 </div>
             </div>
-            <div class="okapiContainer">
-                <span class="okapiText">Okapi25</span>
-                <div class="sliderGroupContainer">
-                    <v-tooltip
-                        :text="b_description"
-                        location="bottom"
+            <v-menu
+                :close-on-content-click="false"
+            >
+                <template v-slot:activator="{ props }">
+                    <v-btn
+                        v-bind="props"
+                        style="margin-left: 2%"
                     >
-                        <template v-slot:activator="{ props }">
-                            <div
-                                class="sliderContainer"
-                                v-bind="props"
-                            >
-                                <span style="width: 12px">b</span>
-                                <v-slider
-                                    :model-value="b_okapi25_parameter"
-                                    :thumb-label="true"
-                                    show-ticks="always"
-                                    density="compact"
-                                    hide-details
-                                    thumb-size="10"
-                                    step="0.1"
-                                    max="1.0"
-                                ></v-slider>
-                            </div>
-                        </template>
-                    </v-tooltip>
+                        <v-icon color="primary">mdi-cog</v-icon>
+                    </v-btn>
+                </template>
+                <v-card style="width: 25vw">
+                    <v-card-title>Okapi25</v-card-title>
+                    <v-card-subtitle>Tweak your parameters!</v-card-subtitle>
+                    <v-card-text>
+                        <div class="okapiContainer">
+<!--                            <span class="okapiText">Okapi25</span>-->
+                            <div class="sliderGroupContainer">
+                                <v-tooltip
+                                    :text="b_description"
+                                    location="bottom"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <div
+                                            class="sliderContainer"
+                                            v-bind="props"
+                                        >
+                                            <span class="parameterTitle">b</span>
+                                            <v-slider
+                                                v-model="b_okapi25_parameter"
+                                                :thumb-label="true"
+                                                show-ticks="always"
+                                                density="compact"
+                                                hide-details
+                                                thumb-size="10"
+                                                step="0.1"
+                                                max="1.0"
+                                            ></v-slider>
+                                        </div>
+                                    </template>
+                                </v-tooltip>
 
-                    <v-tooltip
-                        :text="k1_description"
-                        location="bottom"
-                    >
-                        <template v-slot:activator="{ props }">
-                            <div
-                                class="sliderContainer"
-                                v-bind="props"
-                            >
-                                <span style="width: 12px">k1</span>
-                                <v-slider
-                                    :model-value="k1_okapi25_parameter"
-                                    :thumb-label="true"
-                                    show-ticks="always"
-                                    density="compact"
-                                    hide-details
-                                    thumb-size="10"
-                                    step="0.1"
-                                    min="0.8"
-                                    max="2.0"
-                                ></v-slider>
+                                <v-tooltip
+                                    :text="k1_description"
+                                    location="bottom"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <div
+                                            class="sliderContainer"
+                                            v-bind="props"
+                                        >
+                                            <span class="parameterTitle">k1</span>
+                                            <v-slider
+                                                v-model="k1_okapi25_parameter"
+                                                :thumb-label="true"
+                                                show-ticks="always"
+                                                density="compact"
+                                                hide-details
+                                                thumb-size="10"
+                                                step="0.1"
+                                                min="0.8"
+                                                max="2.0"
+                                            ></v-slider>
+                                        </div>
+                                    </template>
+                                </v-tooltip>
+                                <v-tooltip
+                                    :text="diversity_description"
+                                    location="bottom"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <div
+                                            class="sliderContainer"
+                                            v-bind="props"
+                                        >
+                                            <span class="parameterTitle">Diversity</span>
+                                            <v-slider
+                                                v-model="diversity_okapi25_parameter"
+                                                :thumb-label="true"
+                                                show-ticks="always"
+                                                density="compact"
+                                                hide-details
+                                                thumb-size="10"
+                                                step="0.1"
+                                                min="0.8"
+                                                max="2.0"
+                                            ></v-slider>
+                                        </div>
+                                    </template>
+                                </v-tooltip>
                             </div>
-                        </template>
-                    </v-tooltip>
-                </div>
-            </div>
+                        </div>
+                    </v-card-text>
+                </v-card>
+            </v-menu>
         </div>
     </div>
 </template>
@@ -118,18 +160,20 @@ export default {
             documents: [],
             b_okapi25_parameter: 0.75,
             k1_okapi25_parameter: 1.5,
+            diversity_okapi25_parameter: 1.5,
             b_description: "The b parameter makes sure that search results aren't biased towards very long or very short documents.",
-            k1_description: "The k1 parameter ensures that documents with more instances of the search term are ranked higher."
+            k1_description: "The k1 parameter ensures that documents with more instances of the search term are ranked higher.",
+            diversity_description: "The diversity parameter in search engine queries helps ensure that the search results include a wide variety of information on the topic, rather than repeating similar content."
         };
     },
     methods: {
         sendSearchQuery() {
-            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter);
+            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter)
         },
         sendSpellcheckedQuery() {
             this.query = this.correctedQuery;
             this.$emit('hide-spellchecker');
-            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter);
+            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter);
 
         }
     }
@@ -169,7 +213,7 @@ export default {
     display: flex;
     flex-direction: row;
     margin: 0 2%;
-    width: 60%;
+    width: 100%;
 }
 
 .okapiText {
@@ -210,6 +254,10 @@ export default {
     border-radius: 0 0 8px 8px;
     z-index: 1;
     cursor: pointer;
+}
+
+.parameterTitle {
+    width: 64px;
 }
 
 @media only screen and (max-width: 900px) {

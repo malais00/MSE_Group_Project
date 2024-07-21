@@ -21,23 +21,73 @@ def measure_relevance(ranking):
 def measure_diversity(unique_words):
     return len(unique_words)
 
-def diversify_search_results(ranking, k, l):
+# function for exponentially decaying exposure by rank
+def exposure_dropoff(position, decay_rate = 0.2, e_0 = 1):
+    return e_0 * np.exp((-decay_rate) * position)
+
+#exposure to be expected, if the exposure were to follow ranking quality, scaled by 1
+def expected_exposure(scores):
+    return scores / np.sum(scores)
+
+#assumed true exposure if exponentially decaying exposure by rank is assumed
+def true_exposure(scores):
+    return np.array([exposure_dropoff(position) for position, _ in enumerate(scores)])
+
+#ratio of true exposure scaled by expected exposure per position
+def fairness_metric(true_exposure_score, expected_exposure_score):
+    return true_exposure_score / expected_exposure_score
+
+def normalize_relevance(relevance, len_ranking):
+    if(len_ranking > 0):
+        return  relevance / len_ranking
+    else:
+        return 0
+
+def normalize_diversity(diversity, max_diversity):
+    if(max_diversity > 0):
+        return diversity / max_diversity
+    else:
+        return 0
+
+def normalize_fairness(fairness_ratio):
+    # Using a sigmoid function to normalize
+    return 1 / (1 + np.exp(-fairness_ratio))
+
+def rerank_search_results(ranking, k, l, m):
     if(len(ranking)) == 0:
         return ranking
     reranked = [ranking[0]]
     unique_words = set(ranking[0][1])
 
-    while len(reranked) < k:
+    max_unique_words = []
+
+    for doc in ranking:
+        max_unique_words += [word for word in set(doc[1])]
+
+    max_unique_words = set(max_unique_words)
+
+    scores = [doc[4] for doc in ranking]
+
+    expected_exposure_list = expected_exposure(scores)
+
+    while len(reranked) < k and len(reranked) < len(ranking):
         max_score = float('-inf')
         best_doc = None
-        for doc in ranking:
+        for i, doc in enumerate(ranking):
             if doc in reranked:
                 continue
             relevance = doc[4]
             # Calculate diversity incrementally
             new_words = set(doc[1])
-            diversity = measure_diversity(unique_words.union(new_words))
-            score = l * relevance + (1 - l) * diversity
+            diversity = normalize_diversity(measure_diversity(unique_words.union(new_words)), len(max_unique_words))
+
+            position = len(reranked)
+            new_true_exposure = exposure_dropoff(position)
+
+            fairness_score = normalize_fairness(fairness_metric(new_true_exposure, expected_exposure_list[i]))
+
+            score = (1 - (l + m)) * relevance + l * diversity + m * fairness_score
+
             if score > max_score:
                 max_score = score
                 best_doc = doc
@@ -89,12 +139,20 @@ def okapi_bm25(query, document, inverted_index, b=0.75, k=1.5):
     return score
 
 def min_max_normalize(scores):
-    min_score = min(scores)
-    max_score = max(scores)
-    normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
-    return normalized_scores
+    if(len(scores) > 0):
+        min_score = min(scores)
+        max_score = max(scores)
+        if(max_score != min_score):
+            normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
+            return normalized_scores
+        else:
+            normalized_scores = [0 for score in scores]
+            return normalized_scores
+    else:
+        return scores
 
-def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, pagerank_weight=0):
+
+def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight=0):
     corpus = getCrawledContent(query, inverted_index)
     rsv_vector = []
 
@@ -102,7 +160,12 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
     okapi_scores = []
 
     for document in corpus:
-        pagerank_scores += [page_rank_dict[urlparse(document[0]).netloc]]
+        url = urlparse(document[0]).netloc
+        # fix url not known to pagerank bug
+        if(url in page_rank_dict.keys()):
+            pagerank_scores += [page_rank_dict[url]]
+        else:
+            pagerank_scores += [0]
         okapi_scores += [okapi_bm25(query, document[1], inverted_index, b=b_okapi, k=k1_okapi)]
 
     normalized_pagerank_scores = min_max_normalize(pagerank_scores)
@@ -110,28 +173,26 @@ def ranked_search(query, inverted_index, starting_index, b_okapi, k1_okapi, page
 
     for index, document in enumerate(corpus):
 
-        print(pagerank_weight * normalized_pagerank_scores[index], (1 - pagerank_weight) * normalized_okapi_scores[index])
-
         combined_score = pagerank_weight * normalized_pagerank_scores[index] + (1 - pagerank_weight) * normalized_okapi_scores[index]
 
-        tuple = (document[0], document[1], document[3], document[4], combined_score)
+        tuple = (document[0], document[1], document[3], document[4], combined_score, document[5])
         rsv_vector.append(tuple)
     # sort rsv_vector
     rsv_vector.sort(key=lambda x: x[4], reverse=True)
 
     rsv_percentile = calculate_percentiles(rsv_vector)
-    return diversify_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, 0.5)
+    return rerank_search_results(rsv_percentile[starting_index*10:starting_index*10+10], 10, diversity, fairness)
 
 def calculate_percentiles(rsv_vector):
 
     total_vectors = len(rsv_vector)
 
     percentiles = []
-    for idx, (url, content, id, title, score) in enumerate(rsv_vector):
+    for idx, (url, content, id, title, score, favicon) in enumerate(rsv_vector):
         # Rank starts from 1
         rank = idx + 1
         percentile = math.floor((1 - (rank - 1) / total_vectors) * 100)
-        percentiles.append((url, content, id, title, score, percentile))
+        percentiles.append((url, content, id, title, score, percentile, favicon))
 
     return percentiles
 
