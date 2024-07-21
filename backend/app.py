@@ -85,6 +85,8 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,p
         return jsonify({"error": "rerank parameters must be a valid number"}), 400
     if(not is_float(pagerank_weight)):
         return jsonify({"error": "pagerank weight must be a valid number"}), 400
+    if(not (float(diversity_okapi) + float(fairness_okapi) <= 1)):
+        return jsonify({"error": "rerank parameters must be less than or equal to 1 in sum"}), 400
 
     return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi),
                          k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight))
@@ -101,4 +103,4 @@ def get_document_content(documentId):
     return jsonify(response_object), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
