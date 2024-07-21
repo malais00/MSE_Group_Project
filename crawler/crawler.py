@@ -36,7 +36,7 @@ async def fetch_url(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
-        async with session.get(url, headers=headers, timeout=3) as response:
+        async with session.get(url, headers=headers, timeout=10) as response:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return await response.text()  # Return the content of the response
     except asyncio.TimeoutError:
@@ -53,7 +53,7 @@ def get_links(content, base_url):
     for tag in soup.find_all('a', href=True):
         href = tag['href']
         full_url = urljoin(base_url, href)  # Construct full URL from relative link
-        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url) and link_checker.is_query_page_higher(full_url,5):  # Only consider http and https links
+        if urlparse(full_url).scheme in ['https'] and link_checker.is_whitelisted(full_url) and not link_checker.is_anchortag_at_end(full_url) and not link_checker.is_query_page_higher(full_url,5):  # Only consider http and https links
             links.add(full_url)
     return links
 
