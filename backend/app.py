@@ -81,9 +81,13 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,p
         return jsonify({"error": "Index must be a valid non negative integer"}), 400
     if (not is_float(b_okapi)) or (not is_float(k1_okapi)):
         return jsonify({"error": "Okapi parameters must be a valid number"}), 400
+    if(not is_float(diversity_okapi) or (not is_float(fairness_okapi))):
+        return jsonify({"error": "rerank parameters must be a valid number"}), 400
+    if(not is_float(pagerank_weight)):
+        return jsonify({"error": "pagerank weight must be a valid number"}), 400
 
     return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi),
-                         k1_okapi=float(k1_okapi), diversity=diversity_okapi, fairness=fairness_okapi, pagerank_weight=pagerank_weight)
+                         k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight))
     return jsonify(return_json), 200
 
 @app.route("/api/document/details/<string:documentId>", methods=["GET"])
