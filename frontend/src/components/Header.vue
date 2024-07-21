@@ -52,8 +52,8 @@
                     </v-btn>
                 </template>
                 <v-card style="width: 25vw">
-                    <v-card-title>Okapi25</v-card-title>
-                    <v-card-subtitle>Tweak your parameters!</v-card-subtitle>
+                    <v-card-title>Tweak your parameters!</v-card-title>
+                    <v-card-subtitle>Okapi25</v-card-subtitle>
                     <v-card-text>
                         <div class="okapiContainer">
 <!--                            <span class="okapiText">Okapi25</span>-->
@@ -124,8 +124,66 @@
                                                 hide-details
                                                 thumb-size="10"
                                                 step="0.1"
-                                                min="0.8"
-                                                max="2.0"
+                                                min="0.0"
+                                                max="1.0"
+                                                @update:modelValue="changeDiversity"
+                                            ></v-slider>
+                                        </div>
+                                    </template>
+                                </v-tooltip>
+                                <v-tooltip
+                                    :text="fairness_description"
+                                    location="bottom"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <div
+                                            class="sliderContainer"
+                                            v-bind="props"
+                                        >
+                                            <span class="parameterTitle">Fairness</span>
+                                            <v-slider
+                                                v-model="fairness_okapi25_parameter"
+                                                :thumb-label="true"
+                                                show-ticks="always"
+                                                density="compact"
+                                                hide-details
+                                                thumb-size="10"
+                                                step="0.1"
+                                                min="0.0"
+                                                max="1.0"
+                                                @update:modelValue="changeFairness"
+                                            ></v-slider>
+                                        </div>
+                                    </template>
+                                </v-tooltip>
+                                <span v-show="tradeOffDiversityFairnessWarning" class="errormsg">Tradeoff: Diversity + Fairness can't exceed 1.0</span>
+                            </div>
+                        </div>
+                    </v-card-text>
+                    <v-card-subtitle>PageRank</v-card-subtitle>
+                    <v-card-text>
+                        <div class="okapiContainer">
+                            <div class="sliderGroupContainer">
+                                <v-tooltip
+                                    :text="pagerank_weight_description"
+                                    location="bottom"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <div
+                                            class="sliderContainer"
+                                            v-bind="props"
+                                        >
+                                            <span class="parameterTitle">Weight</span>
+                                            <v-slider
+                                                v-model="pagerank_weight_parameter"
+                                                :thumb-label="true"
+                                                show-ticks="always"
+                                                density="compact"
+                                                hide-details
+                                                thumb-size="10"
+                                                step="0.1"
+                                                min="0.0"
+                                                max="1.0"
                                             ></v-slider>
                                         </div>
                                     </template>
@@ -160,21 +218,39 @@ export default {
             documents: [],
             b_okapi25_parameter: 0.75,
             k1_okapi25_parameter: 1.5,
-            diversity_okapi25_parameter: 1.5,
+            diversity_okapi25_parameter: 0.5,
+            fairness_okapi25_parameter: 0.5,
+            pagerank_weight_parameter: 1.0,
             b_description: "The b parameter makes sure that search results aren't biased towards very long or very short documents.",
             k1_description: "The k1 parameter ensures that documents with more instances of the search term are ranked higher.",
-            diversity_description: "The diversity parameter in search engine queries helps ensure that the search results include a wide variety of information on the topic, rather than repeating similar content."
+            diversity_description: "The diversity parameter in search engine queries helps ensure that the search results include a wide variety of information on the topic, rather than repeating similar content.",
+            fairness_description: "The fairness parameter in search engine queries aims to balance the visibility of content from different sources or perspectives.",
+            pagerank_weight_description: "The PageRank Weight parameter if more referenced sites get displayed more frequently.",
+
+            tradeOffDiversityFairnessWarning: false,
         };
     },
     methods: {
         sendSearchQuery() {
-            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter)
+            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter, this.fairness_okapi25_parameter, this.pagerank_weight_parameter)
         },
         sendSpellcheckedQuery() {
             this.query = this.correctedQuery;
             this.$emit('hide-spellchecker');
-            this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter);
+            this.sendSearchQuery();
 
+        },
+        changeDiversity(value) {
+            if(this.diversity_okapi25_parameter + this.fairness_okapi25_parameter > 1.0) {
+                this.fairness_okapi25_parameter = 1.0 - this.diversity_okapi25_parameter;
+                this.tradeOffDiversityFairnessWarning = true;
+            }
+        },
+        changeFairness(value) {
+            if(this.diversity_okapi25_parameter + this.fairness_okapi25_parameter > 1.0) {
+                this.diversity_okapi25_parameter = 1.0 - this.fairness_okapi25_parameter;
+                this.tradeOffDiversityFairnessWarning = true;
+            }
         }
     }
 }
@@ -235,6 +311,7 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    margin-right: 8px;
 }
 
 .spellcheckContainer {
@@ -281,5 +358,10 @@ export default {
     .headline {
         display: none
     }
+}
+.errormsg {
+    color: rgb(var(--v-theme-error));
+    width: 100%;
+    text-align: center;
 }
 </style>
