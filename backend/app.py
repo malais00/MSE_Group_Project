@@ -23,7 +23,7 @@ CORS(app)
 
 def spellcheck(query):
     misspelled = False
-    query_tokenized = query.split()
+    query_tokenized = query.lower().split()
     unknown = spell_checker.unknown(query_tokenized)
 
     return_array = []
@@ -65,7 +65,7 @@ with app.app_context():
     print("Constructing inverted index")
     inverted_index = invertedIndex(mongoDb)
     print("Initializing spellchecker")
-    spell_checker = SpellChecker(language="en", distance= 5)
+    spell_checker = SpellChecker(language="en", distance= 2)
     keys = list(inverted_index.index.keys())
     keys = [str(key) for key in keys]
     spell_checker.word_frequency.load_words(keys)

@@ -43,6 +43,8 @@ Our search engine is built upon the concepts of transparency, customizability, a
 For example, one user might prioritize fair and diverse results when searching for a good restaurant, while another might focus on finding the best matches for a specific research topic, such as nematode biology. To address this, we give users full control over how searches are performed. Users can customize search parameters to their liking, affecting how documents are ranked.
 
 We use Okapi BM25 as our base ranking system, a well-established ranker used in various search systems. This is further augmented by PageRank and reranking based on result diversity and fairness in document exposure.
+
+Additionally, we also provide query spellchecking suggestions to improve search results.
 ### Supported Parameters
 
 - Okapi BM25 b: Document length normalization
