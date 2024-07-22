@@ -16,10 +16,22 @@
       <file leaf-file-name="query_processing.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/query_processing/query_processing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-106">
+            <state relative-caret-position="-641">
               <caret line="42" column="24" lean-forward="true" selection-start-line="42" selection-start-column="24" selection-end-line="42" selection-end-column="24" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/index/index.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="391">
+              <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -30,11 +42,11 @@
           <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="113" selection-start-line="6" selection-start-column="113" selection-end-line="6" selection-end-column="113" />
+            <state relative-caret-position="204">
+              <caret line="12" column="19" lean-forward="true" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
             </state>
           </provider>
         </entry>
@@ -63,10 +75,10 @@
         <option value="$PROJECT_DIR$/crawler/crawler.py" />
         <option value="$PROJECT_DIR$/crawler/url_ranker.py" />
         <option value="$PROJECT_DIR$/crawler/db.py" />
-        <option value="$PROJECT_DIR$/index/index.py" />
         <option value="$PROJECT_DIR$/backend/app.py" />
         <option value="$PROJECT_DIR$/query_processing/query_processing.py" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/index/index.py" />
       </list>
     </option>
   </component>
@@ -99,6 +111,11 @@
               <item name="MSE_Group_Project" type="b2602c69:ProjectViewProjectNode" />
               <item name="MSE_Group_Project" type="462c0819:PsiDirectoryNode" />
               <item name="crawler" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MSE_Group_Project" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MSE_Group_Project" type="462c0819:PsiDirectoryNode" />
+              <item name="index" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -212,13 +229,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/index/index.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="14" column="52" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/crawler/crawler.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
@@ -233,9 +243,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/ranking_keywords.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="12" column="19" lean-forward="true" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/query_processing/query_processing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-106">
+        <state relative-caret-position="-641">
           <caret line="42" column="24" lean-forward="true" selection-start-line="42" selection-start-column="24" selection-end-line="42" selection-end-column="24" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
@@ -243,13 +263,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ranking_keywords.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
+    <entry file="file://$PROJECT_DIR$/index/index.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="113" selection-start-line="6" selection-start-column="113" selection-end-line="6" selection-end-column="113" />
+        <state relative-caret-position="391">
+          <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -140,7 +140,3 @@ mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
 print(mongo_uri)
 
 mongoDb = MongoDB(mongo_uri)
-#invIndex = invertedIndex(mongoDb)
-
-#print(invIndex.intersect_search_and(["Tübingen", "Travel", "guide"]))
-#print(len(invIndex.intersect_search_or(["Tübingen", "Travel", "guide"])))
