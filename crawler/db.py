@@ -45,7 +45,8 @@ class MongoDB:
             self.db.create_collection("queue")
         except pymongo.errors.CollectionInvalid:
             pass
-        
+    
+    # Function to save the crawled page in the database
     def savePage(self, url, title, content, date, links, favicon):
         document = {"url": url, "title": title, "content": content, "indexDate": date, "links": links, "favicon": favicon}
         db = self.client.searchEngine
