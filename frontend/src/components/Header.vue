@@ -242,10 +242,12 @@ export default {
         };
     },
     methods: {
+        // Emit the search query to the parent component
         sendSearchQuery() {
             this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter, this.fairness_okapi25_parameter, this.pagerank_weight_parameter)
         },
 
+        // Emit the corrected search query to the parent component
         sendSpellcheckedQuery() {
             this.query = this.correctedQuery;
             this.$emit('hide-spellchecker');

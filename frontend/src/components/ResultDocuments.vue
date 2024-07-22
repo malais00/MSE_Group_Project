@@ -99,6 +99,7 @@ export default {
         }
     },
     methods: {
+        // Check if the favicon exists on the given url before loading it, to avoid broken images
         async checkFavicon(url) {
             try {
                 const response = await fetch(url, { method: 'HEAD' });
@@ -114,11 +115,13 @@ export default {
                 return;
             }
             const container = event.target;
+            // Fetch more results when the user scrolls to the bottom of the page
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 500 && !this.loadingResults) {
                 this.fetchMoreResults();
             }
         },
 
+        // If we aren't currently loading results and there were previously results fetched, fetch more results
         fetchMoreResults() {
             if (!this.loadingResults && this.searchResults.length !== 0) {
                 this.$emit('fetchMoreResults', this.searchResults.length / 10);

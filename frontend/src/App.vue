@@ -103,7 +103,8 @@ export default {
                     this.showSnackbar('Something went wrong searching for documents.', 'error');
                     this.loadingResults = false;
                 }
-                this.checkSpelling(query); // Don't await this for performance reasons
+                // Don't await this for performance reasons
+                this.checkSpelling(query);
             }
         },
 
