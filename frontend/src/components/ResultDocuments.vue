@@ -1,7 +1,6 @@
 <template>
     <div>
         <div class="resultDocumentsContainer" @scroll="handleScroll">
-            <!--            <CategoryFilter/>-->
             <div
                 v-if="loadingResults && searchResults.length === 0 && !maxDocumentsReached"
                 class="readyInfo"
@@ -20,7 +19,6 @@
                 <div class="docContainer">
                     <div class="percentileDiv">
                         <div class="percentileLine" :style="`bottom: ${scalePercentileLine(doc.percentile)}px`"></div>
-                        <!--                        <span>{{doc.percentile }}</span>-->
                     </div>
 
                     <v-divider vertical :thickness="2" style="margin-right: 12px"></v-divider>
@@ -28,8 +26,8 @@
                     <div style="display: flex; flex-direction: row; align-items: center">
                         <div style="display: flex; flex-direction: column">
                             <div style="display: flex; flex-direction: row; align-items: center">
-                                <v-icon v-if="doc.favicon === '' || doc.favicon === undefined">mdi-web</v-icon>
-                                <img class="faviconDoc" alt="" :src="doc.favicon ? doc.favicon : ''">
+                                <v-icon v-if="!doc.faviconExists">mdi-web</v-icon>
+                                <img class="faviconDoc" alt="" v-else :src="doc.favicon">
                                 <h2>{{ doc.title }}</h2>
                             </div>
                             <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
@@ -84,18 +82,35 @@ export default {
     },
     watch: {
         // Watch for changes in searchResults and fetch descriptions for new documents
-        searchResults() {
-            this.searchResults.forEach(async (doc) => {
-                if(doc.description === undefined) {
-                    doc.description = await this.getDocumentDescription(doc.url);
-                }
-            });
+        searchResults: {
+            handler(newResults) {
+                newResults.forEach(async (doc) => {
+                    if (doc.description === undefined) {
+                        doc.description = await this.getDocumentDescription(doc.url);
+                    }
+                    if (doc.favicon) {
+                        doc.faviconExists = await this.checkFavicon(doc.favicon);
+                    } else {
+                        doc.faviconExists = false;
+                    }
+                });
+            },
+            immediate: true
         }
     },
     methods: {
+        async checkFavicon(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        },
+
         // Fetch more results when the user scrolls to the bottom of the page
         handleScroll(event) {
-            if(this.maxDocumentsReached) {
+            if (this.maxDocumentsReached) {
                 return;
             }
             const container = event.target;
@@ -112,10 +127,10 @@ export default {
 
         // Fetch a description for the url by using a backend proxy to escape CORS problems
         async getDocumentDescription(url) {
-            const response = await request.getRequest("/document/first-paragraph/"+this.currentQuery + "?url=" + url);
-            if(await checkResponseStatus(200, response)) {
+            const response = await request.getRequest("/document/first-paragraph/" + this.currentQuery + "?url=" + url);
+            if (await checkResponseStatus(200, response)) {
                 const res = await response.json();
-                if(res.first_paragraph !== undefined) {
+                if (res.first_paragraph !== undefined) {
                     return res.first_paragraph;
                 } else {
                     return '';
