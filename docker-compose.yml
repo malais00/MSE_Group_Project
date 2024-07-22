@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./searchEngine.crawled.json:/data/data.json
+    command: bash -c "mongod --bind_ip_all --fork --logpath /var/log/mongodb.log && mongoimport --uri mongodb://localhost:27017/searchEngine --collection crawled --type json --file /data/data.json --jsonArray && tail -f /dev/null"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile_backend
+    container_name: backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/searchEngine
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile_frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
