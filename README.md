@@ -6,8 +6,6 @@ Modern Search Engines Group Project Summer by Jannik Brandstetter, Julian Borbec
 - [Setup](#setup)
 - [Features](#features)
   - [Supported Parameters](#supported-parameters)
-- [Getting Started](#getting-started)
-
 ## Introduction
 ### Tü-be-fair
 Introducing Tü-be-fair, our approach to a webapp search engine, following the lecture of Modern Search Engines of SS24. Our main goal was to create a search engine that incorporates user preferences into its decision-making process and aims to be as transparent as possible in its output. Users can select parameters and see how their choices affect the search results.
