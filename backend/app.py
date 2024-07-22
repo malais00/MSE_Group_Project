@@ -131,13 +131,15 @@ def get_first_paragraph(query):
                 print("Paragraph: ",striped_text)
                 print("words: ", words) 
                 if words in striped_text:
-                    first_paragraph = paragraph.text
+                    # Only return the part of the paragraph that contains the query and 10 Characters after and add ... at the end of the string
+                    first_paragraph = striped_text[striped_text.index(words):striped_text.index(words) + 200] + "..."
                     found = True
                     break
 
         
         if found == False:
-            first_paragraph = paragraphs[0].text
+            # Return first 100 characters of the first paragraph
+            first_paragraph = paragraphs[0].text[:200] + "..." 
 
     except Exception as e:
         return jsonify({"error": repr(e)}), 400
