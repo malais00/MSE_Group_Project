@@ -99,7 +99,7 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,p
                          k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight))
     return jsonify(return_json), 200
 
-@app.route("/api/document/details/<string:documentId>", methods=["GET"])
+@app.route("/api/document/details/<string:documentId>", methods=["POST"])
 def get_document_content(documentId):
     try:
         content = mongoDb.getCrawledContentByIndex([ObjectId(documentId)])[0]
@@ -118,8 +118,9 @@ def get_first_paragraph(query):
         # Call url with beautiful soup to get the description of the page
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        paragraphs = soup.find_all('p')
-
+        containers = soup.find_all(text=True)
+        paragraphs = [container for container in containers if container.parent.name in ['p', 'div', 'span']]
+        print("Paragraphs: ", paragraphs)
         processed_query = " ".join(preprocess_content(query))
 
         first_paragraph = None
@@ -129,27 +130,21 @@ def get_first_paragraph(query):
             for paragraph in paragraphs:
                 # Strip paragraph text of any :, "", ?, !, ., etc.
                 striped_text = (paragraph.text).lower()
-                print("Paragraph: ",striped_text)
-                print("words: ", words) 
                 if words in striped_text:
                     # Only return the part of the paragraph that contains the query and 10 Characters after and add ... at the end of the string
-                    first_paragraph = paragraph.text[striped_text.index(words):striped_text.index(words) + 200] + "..."
+                    first_paragraph = paragraph.text[striped_text.index(words):striped_text.index(words) + 300] + "..."
                     found = True
                     break
 
         
         if found == False:
-            # Return first 100 characters of the first paragraph
-            first_paragraph = paragraphs[0].text[:200] + "..." 
+            # Return longest paragraph
+            first_paragraph = max(paragraphs, key=len).text[:300] + "..."
 
     except Exception as e:
         return jsonify({"error": repr(e)}), 400
 
     return jsonify({"first_paragraph": first_paragraph}), 200
-
-
-
-
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
