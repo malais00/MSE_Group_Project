@@ -42,10 +42,10 @@ For example, one user might prioritize fair and diverse results when searching f
 We use Okapi BM25 as our base ranking system, a well-established ranker used in various search systems. This is further augmented by PageRank and reranking based on result diversity and fairness in document exposure.
 ### Supported Parameters
 
--Okapi BM25 b: Document length normalization
--Okapi BM25 k: Term frequency saturation
--Diversity weight: Weighs the importance of diversity in reranking
--Fairness weight: Weighs the difference between ranking score and expected exposure in reranking
--Pagerank weight: Weighs the importance of the PageRank score
+- Okapi BM25 b: Document length normalization
+- Okapi BM25 k: Term frequency saturation
+- Diversity weight: Weighs the importance of diversity in reranking
+- Fairness weight: Weighs the difference between ranking score and expected exposure in reranking
+- Pagerank weight: Weighs the importance of the PageRank score
 
 Users have full control over these parameters on a per-query basis. The original, non-reranked score percentiles for each query are displayed, allowing users to see how their changes impact search results. We have also identified standard parameters that produce acceptable results for most queries.
