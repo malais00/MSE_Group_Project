@@ -33,7 +33,7 @@ After building, you can start the project with:
 ```sh
 docker compose up
 ```
-Features
+## Features
 
 Our search engine is built upon the concepts of transparency, customizability, and performance. Just as there is no single type of user, there isn't a single set of search engine parameters that works best for everyone.
 
