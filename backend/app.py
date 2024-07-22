@@ -57,14 +57,19 @@ def is_float(element):
 
 
 with app.app_context():
+    print("Starting setup")
     preprocess_preparation()
     mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+    print("Connecting to batabase")
     mongoDb = MongoDB(mongo_uri)
+    print("Constructing inverted index")
     inverted_index = invertedIndex(mongoDb)
+    print("Initializing spellchecker")
     spell_checker = SpellChecker(language="en", distance= 2)
     keys = list(inverted_index.index.keys())
     keys = [str(key) for key in keys]
     spell_checker.word_frequency.load_words(keys)
+    print("Setup done, starting server")
 
 @app.route("/api/query/spellcheck/<string:query>", methods=["GET"])
 def get_spellcheck(query):
@@ -119,7 +124,6 @@ def get_first_paragraph(query):
         soup = BeautifulSoup(response.text, 'html.parser')
         containers = soup.find_all(text=True)
         paragraphs = [container for container in containers if container.parent.name in ['p', 'div', 'span']]
-        print("Paragraphs: ", paragraphs)
         processed_query = " ".join(preprocess_content(query))
 
         first_paragraph = None
