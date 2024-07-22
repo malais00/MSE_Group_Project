@@ -1,7 +1,7 @@
 <template>
     <div class="headerContainer">
         <div style="display: flex; flex-direction: row; width: 100%; height: 100%; justify-content: flex-start; align-items: center">
-            <h1 class="headline">Tü-Be-Fair</h1>
+            <img style="width: 150px; margin: 4px 24px" :src="logoWhite">
             <div
                 class="queryContainer"
             >
@@ -209,6 +209,8 @@
 </template>
 
 <script>
+import logo from "@/assets/tubefairlogo.png";
+import logoWhite from "@/assets/tubefairlogo_white.png";
 export default {
     name: "Header",
     props: {
@@ -239,6 +241,9 @@ export default {
             pagerank_weight_description: "The PageRank Weight parameter if more referenced sites get displayed more frequently.",
 
             tradeOffDiversityFairnessWarning: false,
+
+            logo,
+            logoWhite,
         };
     },
     methods: {
