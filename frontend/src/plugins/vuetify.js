@@ -22,7 +22,10 @@ const customTheme = {
         white: '#ffffff',
         error: '#8f0808',
         success: '#4CAF50',
-        warning: '#FB8C00'
+        warning: '#FB8C00',
+        font: '#ffffff',
+        cog: '#a51e37',
+        slider: '#000000',
     }
 };
 
@@ -38,7 +41,10 @@ const customDarkTheme = {
         white: '#ffffff',
         error: '#8f0808',
         success: '#4CAF50',
-        warning: '#FB8C00'
+        warning: '#FB8C00',
+        font: '#444444',
+        cog: '#ffffff',
+        slider: '#ffffff',
     }
 };
 

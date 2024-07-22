@@ -39,7 +39,7 @@ import * as request from "@/api/request";
 import {checkResponseStatus} from "@/util/check";
 
 export default {
-    name: "CategoryFilter",
+    name: "App",
     data() {
         return {
             ResultDocuments,
@@ -62,23 +62,26 @@ export default {
         }
     },
     methods: {
+        // Search for documents based on the given query and index
         async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter, diversity_okapi25_parameter, fairness_okapi25_parameter, pagerank_weight_parameter, initialQuery=false) {
-            if(initialQuery) {
-                this.maxDocumentsReached = false;
-                this.searchResults = [];
-            }
             this.currentQueryReadOnly = query;
             this.b_okapi25_parameterReadOnly = b_okapi25_parameter;
             this.k1_okapi25_parameterReadOnly = k1_okapi25_parameter;
             this.diversity_okapi25_parameterReadOnly = diversity_okapi25_parameter;
             this.fairness_okapi25_parameterReadOnly = fairness_okapi25_parameter;
             this.pagerank_weight_parameterReadOnly = pagerank_weight_parameter;
+            // Check if query is empty
             if(query !== "") {
+                if(initialQuery) {
+                    this.maxDocumentsReached = false;
+                    this.searchResults = [];
+                }
                 this.loadingResults = true;
                 try {
                     const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter+"/"+diversity_okapi25_parameter+"/"+fairness_okapi25_parameter+"/pagerank/"+pagerank_weight_parameter);
                     if(await checkResponseStatus(200, response)) {
                         const res = await response.json();
+                        // If the response contains less than 10 documents, we reached the end of possible documents we can retrieve
                         if(res.length < 10) {
                             this.maxDocumentsReached = true;
                         }
@@ -88,6 +91,7 @@ export default {
                             }
                             this.searchResults = res;
                         } else {
+                            // If this isn't an initial query, we append the results to the existing ones
                             this.searchResults = this.searchResults.concat(res);
                         }
                         this.loadingResults = false;
@@ -103,6 +107,7 @@ export default {
             }
         },
 
+        // Check the spelling of the given query
         async checkSpelling(query) {
             const response = await request.getRequest("/query/spellcheck/"+query);
             if(await checkResponseStatus(200, response)) {
@@ -114,25 +119,12 @@ export default {
             }
         },
 
+        // Show a snackbar with the given text and color
         showSnackbar(text, color) {
             this.snackbarActivator = true;
             this.snackbarText = text;
             this.snackbarColor = color;
         },
-
-        async getNextDocuments(query, index) {
-            const response = await request.getRequest("/query/"+query+"/"+index);
-            await checkResponseStatus(200, response);
-            const res = await response.json();
-            this.searchResults = res;
-        },
-
-        async getDetails(documentId) {
-            const response = await request.getRequest("/document/details/"+documentId);
-            await checkResponseStatus(200, response);
-            const res = await response.json();
-            const documentDetails = res;
-        }
     }
 }
 </script>

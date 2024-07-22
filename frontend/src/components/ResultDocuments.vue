@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="resultDocumentsContainer" @scroll="handleScroll">
-<!--            <CategoryFilter/>-->
+            <!--            <CategoryFilter/>-->
             <div
                 v-if="loadingResults && searchResults.length === 0 && !maxDocumentsReached"
                 class="readyInfo"
@@ -15,11 +15,12 @@
             <div
                 v-else-if="searchResults.length !== 0"
                 v-for="doc in searchResults"
+                :key="doc.url"
             >
                 <div class="docContainer">
                     <div class="percentileDiv">
                         <div class="percentileLine" :style="`bottom: ${scalePercentileLine(doc.percentile)}px`"></div>
-<!--                        <span>{{doc.percentile }}</span>-->
+                        <!--                        <span>{{doc.percentile }}</span>-->
                     </div>
 
                     <v-divider vertical :thickness="2" style="margin-right: 12px"></v-divider>
@@ -32,7 +33,7 @@
                                 <h2>{{ doc.title }}</h2>
                             </div>
                             <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
-                            <p>{{ doc.description }}</p>
+                            <p v-html="highlightedDescription(doc.description)"></p>
                         </div>
                     </div>
                 </div>
@@ -79,11 +80,10 @@ export default {
         },
     },
     data() {
-        return {
-
-        };
+        return {};
     },
     watch: {
+        // Watch for changes in searchResults and fetch descriptions for new documents
         searchResults() {
             this.searchResults.forEach(async (doc) => {
                 if(doc.description === undefined) {
@@ -93,6 +93,7 @@ export default {
         }
     },
     methods: {
+        // Fetch more results when the user scrolls to the bottom of the page
         handleScroll(event) {
             if(this.maxDocumentsReached) {
                 return;
@@ -102,11 +103,14 @@ export default {
                 this.fetchMoreResults();
             }
         },
+
         fetchMoreResults() {
             if (!this.loadingResults && this.searchResults.length !== 0) {
                 this.$emit('fetchMoreResults', this.searchResults.length / 10);
             }
         },
+
+        // Fetch a description for the url by using a backend proxy to escape CORS problems
         async getDocumentDescription(url) {
             const response = await request.getRequest("/document/first-paragraph/"+this.currentQuery + "?url=" + url);
             if(await checkResponseStatus(200, response)) {
@@ -119,6 +123,8 @@ export default {
             }
             return '';
         },
+
+        // Scale the percentile line to fit the 0-100 range (tweak it a little because most values are above 25/50)
         scalePercentileLine(percentile) {
             if (percentile < 25) {
                 return 0;
@@ -126,6 +132,17 @@ export default {
             let normalizedPercentile = percentile - 25;
             let scaledPercentile = normalizedPercentile * (100 / 75);
             return (scaledPercentile / 100) * 60;
+        },
+
+        // Highlight the search query in the description
+        highlightedDescription(description) {
+            if (!description || !this.currentQuery) return description;
+            const queries = this.currentQuery.split(' ');
+            queries.forEach(query => {
+                const regex = new RegExp(`(${query})`, 'gi');
+                description = description.replace(regex, '<strong>$1</strong>');
+            });
+            return description;
         }
     }
 }
@@ -134,7 +151,7 @@ export default {
 <style lang="scss">
 .resultDocumentsContainer {
     overflow: auto;
-    color: rgb(var(--v-theme-font));
+    color: rgb(var(--v-theme-slider));
     padding: 2%;
     height: 100%;
 }
@@ -169,7 +186,7 @@ export default {
     max-height: 64px;
     margin-right: 18px;
     background: linear-gradient(to bottom, #00be00, rgb(var(--v-theme-primary)));
-    border-radius: 25px;
+    border-radius: 8px;
     border: 1px solid black;
 }
 
@@ -178,6 +195,7 @@ export default {
     min-width: 19px;
     min-height: 2px;
     left: -4px;
-    background: black;
+    background: rgb(var(--v-theme-slider));
 }
+
 </style>

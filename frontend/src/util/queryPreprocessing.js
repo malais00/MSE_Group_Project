@@ -9,7 +9,6 @@ const preprocessQuery = async (query) => {
 
     const stemmedWords = words.map(word => stemmer(word));
     const result = stemmedWords.join(' ');
-    console.log(result);
     return result;
 };
 
