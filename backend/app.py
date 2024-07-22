@@ -124,7 +124,6 @@ def get_first_paragraph(query):
         soup = BeautifulSoup(response.text, 'html.parser')
         paragraphs_raw = [element.strip() for element in soup.stripped_strings]
         paragraphs = [re.sub(r'[\t\n\r]', ' ', text) for text in paragraphs_raw]
-        print(paragraphs)
         processed_query = " ".join(preprocess_content(query))
         first_paragraph = None
         found = False
