@@ -174,7 +174,7 @@ def get_100(query_list):
         if(index == 0):
             return_df = query_df
         else:
-            return_df.append(query_df, ignore_index=True)
+            return_df = pd.concat([return_df, query_df], ignore_index=True)
 
     tsv_buffer = io.StringIO()
 
