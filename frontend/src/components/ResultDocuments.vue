@@ -17,14 +17,16 @@
                 v-for="doc in searchResults"
             >
                 <div class="docContainer">
+                    <div class="percentileDiv"></div>
                     <div style="display: flex; flex-direction: row; align-items: center">
                         <div style="display: flex; flex-direction: column">
                             <div style="display: flex; flex-direction: row; align-items: center">
+                                <v-icon v-if="doc.favicon === '' || doc.favicon === undefined">mdi-web</v-icon>
                                 <img class="faviconDoc" alt="" :src="doc.favicon ? doc.favicon : ''">
                                 <h2>{{ doc.title }}</h2>
                             </div>
                             <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
-                            <p>{{ doc.preview }}</p>
+                            <p>{{ getDocumentDescription(doc.url) }}</p>
                         </div>
                     </div>
                 </div>
@@ -46,6 +48,8 @@
 
 <script>
 import CategoryFilter from "@/components/CategoryFilter.vue";
+import * as request from "@/api/request";
+import {checkResponseStatus} from "@/util/check";
 
 export default {
     name: "ResultDocuments",
@@ -84,6 +88,13 @@ export default {
                 console.log("fetching more results: ", this.searchResults.length / 10);
                 this.$emit('fetchMoreResults', this.searchResults.length / 10);
             }
+        },
+        async getDocumentDescription(url) {
+            const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter+"/"+diversity_okapi25_parameter+"/"+fairness_okapi25_parameter+"/pagerank/"+pagerank_weight_parameter);
+            if(await checkResponseStatus(200, response)) {
+                const res = response.json();
+                console.log(res);
+            }
         }
     }
 }
@@ -99,7 +110,9 @@ export default {
 
 .docContainer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     padding: 2vh 0;
 }
 
@@ -115,5 +128,13 @@ export default {
     width: 24px;
     height: 24px;
     margin-right: 8px
+}
+
+.percentileDiv {
+    width: 12px;
+    height: 48px;
+    background: linear-gradient(to bottom, green, red);
+    border-radius: 25px;
+    border: 1px solid black;
 }
 </style>

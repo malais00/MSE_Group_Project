@@ -1,7 +1,7 @@
 <template>
     <div class="headerContainer">
         <div style="display: flex; flex-direction: row; width: 100%; height: 100%; justify-content: flex-start; align-items: center">
-            <h1 class="headline">TübiSearch</h1>
+            <h1 class="headline">Tü-Be-Fair</h1>
             <div
                 class="queryContainer"
             >
@@ -76,6 +76,7 @@
                                                 hide-details
                                                 thumb-size="10"
                                                 step="0.1"
+                                                min="0.2"
                                                 max="1.0"
                                             ></v-slider>
                                         </div>
@@ -106,6 +107,13 @@
                                         </div>
                                     </template>
                                 </v-tooltip>
+                            </div>
+                        </div>
+                    </v-card-text>
+                    <v-card-subtitle>Variety</v-card-subtitle>
+                    <v-card-text>
+                        <div class="okapiContainer">
+                            <div class="sliderGroupContainer">
                                 <v-tooltip
                                     :text="diversity_description"
                                     location="bottom"
@@ -216,11 +224,11 @@ export default {
         return {
             query: '',
             documents: [],
-            b_okapi25_parameter: 0.75,
+            b_okapi25_parameter: 0.9,
             k1_okapi25_parameter: 1.5,
-            diversity_okapi25_parameter: 0.5,
-            fairness_okapi25_parameter: 0.5,
-            pagerank_weight_parameter: 1.0,
+            diversity_okapi25_parameter: 0.3,
+            fairness_okapi25_parameter: 0.3,
+            pagerank_weight_parameter: 0.5,
             b_description: "The b parameter makes sure that search results aren't biased towards very long or very short documents.",
             k1_description: "The k1 parameter ensures that documents with more instances of the search term are ranked higher.",
             diversity_description: "The diversity parameter in search engine queries helps ensure that the search results include a wide variety of information on the topic, rather than repeating similar content.",
@@ -282,6 +290,7 @@ export default {
 }
 
 .headline {
+    white-space: nowrap;
     padding: 0 2%;
 }
 

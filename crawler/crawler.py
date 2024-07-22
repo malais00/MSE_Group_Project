@@ -32,7 +32,7 @@ async def fetch_url(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
     try:
         # Perform an HTTP GET request with a 2-second timeout
-        async with session.get(url, headers=headers, timeout=4) as response:
+        async with session.get(url, headers=headers, timeout=3) as response:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return await response.text()  # Return the content of the response
     except asyncio.TimeoutError:
