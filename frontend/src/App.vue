@@ -14,6 +14,7 @@
                 :searchResults="searchResults"
                 :loading-results="loadingResults"
                 :maxDocumentsReached="maxDocumentsReached"
+                :current-query="currentQueryReadOnly"
                 class="resultDocuments"
                 @fetchMoreResults="(index) => searchQuery(currentQueryReadOnly, index, b_okapi25_parameterReadOnly, k1_okapi25_parameterReadOnly, diversity_okapi25_parameterReadOnly, fairness_okapi25_parameterReadOnly, pagerank_weight_parameterReadOnly, false)"
             />

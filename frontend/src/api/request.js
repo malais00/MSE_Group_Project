@@ -7,13 +7,14 @@ const getCookie = (name) => {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-const getRequest = async (path) => {
+const getRequest = async (path, body = null) => {
     // const token = getCookie('token');
     const response = await fetch('http://' + backendAddress + ':5000' + '/api' + path, {
         method: "GET", // *GET, POST, PUT, DELETE, etc.
         headers: {
             "Content-Type": "application/json",
         },
+        body: body ? JSON.stringify(body) : null,
     });
     return response;
 }
@@ -25,7 +26,6 @@ const postRequest = async (path, body) => {
         body: JSON.stringify(body),
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
         },
     });
     return response;

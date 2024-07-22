@@ -17,7 +17,10 @@
                 v-for="doc in searchResults"
             >
                 <div class="docContainer">
-                    <div class="percentileDiv"></div>
+                    <div class="percentileDiv">
+                        <div class="percentileLine"></div>
+                    </div>
+
                     <div style="display: flex; flex-direction: row; align-items: center">
                         <div style="display: flex; flex-direction: column">
                             <div style="display: flex; flex-direction: row; align-items: center">
@@ -26,7 +29,7 @@
                                 <h2>{{ doc.title }}</h2>
                             </div>
                             <a style="width: fit-content" :href="doc.url">{{ doc.url }}</a>
-                            <p>{{ getDocumentDescription(doc.url) }}</p>
+                            <p>{{ doc.description }}</p>
                         </div>
                     </div>
                 </div>
@@ -66,12 +69,25 @@ export default {
         maxDocumentsReached: {
             type: Boolean,
             required: true
-        }
+        },
+        currentQuery: {
+            type: String,
+            required: true
+        },
     },
     data() {
         return {
 
         };
+    },
+    watch: {
+        searchResults() {
+            this.searchResults.forEach(async (doc) => {
+                if(doc.description === undefined) {
+                    doc.description = await this.getDocumentDescription(doc.url);
+                }
+            });
+        }
     },
     methods: {
         handleScroll(event) {
@@ -90,11 +106,16 @@ export default {
             }
         },
         async getDocumentDescription(url) {
-            const response = await request.getRequest("/query/"+query+"/"+index+"/okapi/"+b_okapi25_parameter+"/"+k1_okapi25_parameter+"/"+diversity_okapi25_parameter+"/"+fairness_okapi25_parameter+"/pagerank/"+pagerank_weight_parameter);
+            const response = await request.getRequest("/document/first-paragraph/"+this.currentQuery + "?url=" + url);
             if(await checkResponseStatus(200, response)) {
-                const res = response.json();
-                console.log(res);
+                const res = await response.json();
+                if(res.first_paragraph !== undefined) {
+                    return res.first_paragraph;
+                } else {
+                    return '';
+                }
             }
+            return '';
         }
     }
 }
@@ -131,10 +152,21 @@ export default {
 }
 
 .percentileDiv {
-    width: 12px;
-    height: 48px;
+    position: relative;
+    min-width: 12px;
+    min-height: 48px;
+    max-width: 12px;
+    max-height: 48px;
     background: linear-gradient(to bottom, green, red);
     border-radius: 25px;
     border: 1px solid black;
+}
+
+.percentileLine {
+    position: absolute;
+    min-width: 11px;
+    min-height: 2px;
+    bottom: 12px;
+    background: black;
 }
 </style>
