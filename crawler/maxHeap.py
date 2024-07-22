@@ -7,6 +7,7 @@ class UrlMaxHeap:
         self.REMOVED = '<removed-url>'  # placeholder for a removed url
         self.counter = 0  # unique sequence count
 
+    # Function to add a new URL to the heap
     def add_url(self, url, score, depth):
         if url not in self.entry_finder:
 
@@ -16,16 +17,19 @@ class UrlMaxHeap:
             heapq.heappush(self.heap, entry)
             self.counter += 1
 
+    # Function to remove a URL from the heap
     def remove_url(self, url):
         # Mark an existing entry as REMOVED
         entry = self.entry_finder.pop(url)
         entry[-2] = self.REMOVED
         self.counter -= 1
 
+    # Function to clean up the heap
     def cleanup(self):
         self.heap = [entry for entry in self.heap if entry.url is not self.REMOVED]
         heapq.heapify(self.heap)
 
+    # Function to pop the URL with the highest score
     def pop_url(self):
         while self.heap:
             score, count, url, depth = heapq.heappop(self.heap)
@@ -36,5 +40,6 @@ class UrlMaxHeap:
 
         raise KeyError('pop from an empty priority queue')
 
+    # Function to update the score of a URL
     def update_score(self, url, new_score):
         self.add_url(url, new_score)

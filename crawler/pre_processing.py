@@ -5,7 +5,7 @@ from io import StringIO
 from html.parser import HTMLParser
 from bs4 import BeautifulSoup
 
-
+# Function to strip tags from content
 def strip_tags(value):
     """Returns the given HTML with all tags stripped."""
     class MLStripper(HTMLParser):
@@ -18,7 +18,7 @@ def strip_tags(value):
             self.text.write(d)
         def get_data(self):
             return self.text.getvalue()
-    
+
     def _strip_once(value):
         s = MLStripper()
         s.feed(value)
@@ -33,6 +33,7 @@ def strip_tags(value):
         value = new_value
     return value
 
+# Function to clean the content
 def cleanMe(html):
     soup = BeautifulSoup(html, "html.parser") # create a new bs4 object from the html data loaded
     for script in soup(["script", "style"]): # remove all javascript and stylesheet code
@@ -46,16 +47,21 @@ def cleanMe(html):
     # drop blank lines
     text = '\n'.join(chunk for chunk in chunks if chunk)
     return text
+
+# Function to remove punctation
 def remove_punctuation(text):
     return re.sub(r'[^\w\s]', '', text)
 
+# Function to remove stopwords
 def remove_stopwords(text):
     stop_words = set(stopwords.words('english'))
     return ' '.join([word for word in text.split() if word.lower() not in stop_words])
 
+# Function to remove URLs
 def remove_urls(text):
     return re.sub(r'http\S+', '', text)
 
+# Function to remove emojis
 def remove_emoji(text):
     emoji_clean = re.compile("["
                              u"\U0001F600-\U0001F64F"  # emoticons
@@ -70,26 +76,32 @@ def remove_emoji(text):
     text = url_clean.sub(r'', text)
     return text
 
+# Function to stem text
 def stem_text(words):
     stemmer = nltk.stem.PorterStemmer()
     return [stemmer.stem(word) for word in words]
 
+# Function to lemmatize text
 def lemmatize_text(words):
     lemmatizer = nltk.stem.WordNetLemmatizer()
     return [lemmatizer.lemmatize(word) for word in words]
 
+# Function to remove '39s
 def remove_39s(text):
     return re.sub(r'39s', '', text)
 
+# Function to lowercase text
 def lowercase_text(text):
     return text.lower()
 
+# Function to preprocess content
 def preprocess_content(text):
     pipeline = [cleanMe, remove_punctuation, lowercase_text,remove_stopwords, remove_urls, remove_emoji, remove_39s ,nltk.tokenize.word_tokenize, lemmatize_text]
     for step in pipeline:
         text = step(text)
     return text
 
+# Function to preprocess preparation
 def preprocess_preparation():
     nltk.download('stopwords')
     nltk.download('wordnet')

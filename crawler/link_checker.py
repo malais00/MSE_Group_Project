@@ -1,7 +1,7 @@
 import urllib.parse
 import re
 
-# only take normal websites (not xml etc..)
+# Function to check if the URL is in the whitelist
 def is_whitelisted(url):
     # create blacklist of url endings
     blacklist = [".xml", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".mp4", ".mp3", ".avi", ".mov", 
@@ -14,11 +14,13 @@ def is_whitelisted(url):
             return False
     return True
 
+# Function to check if the URL has an anchor tag at the end
 def is_anchortag_at_end(url):
     if urllib.parse.urlparse(url).fragment:
         return True
     return False
 
+# Function to check if the URL is a query page with a page number higher than max_page
 def is_query_page_higher(url, max_page=10):
     query = urllib.parse.urlparse(url).query.split("&")
     for q in query:

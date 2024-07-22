@@ -165,19 +165,15 @@ async def crawl(seed_urls, max_depth=2, batch_size=10, max_links=100, visited=se
             score, url, depth = heap.pop_url()  # Get the next URL and its depth from the queue
             if url.endswith('/'):
                 url = url[:-1]
-            
             if is_url_crawled(url, visited):
-                continue
-
-
+                continue # Skip if the URL has already been crawled
             if not link_checker.is_whitelisted(url) or link_checker.is_anchortag_at_end(url):
-                continue
+                continue # Skip if the URL is not whitelisted or is an anchor tag at the end
             if int(depth) > max_depth or url in visited:
                 continue  # Skip if the URL exceeds max depth or has been visited
             if not await is_allowed(session, url):
                 logging.info(f"Blocked by robots.txt: {url}")
                 continue  # Skip if the URL is disallowed by robots.txt
-
             
             content = await fetch_url(session, url)  # Fetch the URL content
 
@@ -212,7 +208,6 @@ if __name__ == "__main__":
         with open("./seed.txt") as f:
             data = f.read()
         seed_documents = data.split("\n")
-        print(seed_documents)
         max_depth = 1000
         batch_size = 10
         max_links = 1000000

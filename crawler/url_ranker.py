@@ -6,6 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../ran
 with open("./ranking_keywords.txt", "r") as f:
     ranking_keywords = f.read().lower().split(",")
 
+# Function to rank URLs based on the presence of keywords in the URL and the depth of the URL
 def url_ranker(url, depth, keyword_score = 0.1):
     url = url.lower()
     score = 1
