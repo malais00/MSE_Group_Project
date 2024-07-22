@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from bson import ObjectId
 import requests
 import sys
 import os
+import io
 from bs4 import BeautifulSoup
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../crawler'))
 from db import MongoDB
@@ -14,8 +15,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../que
 from query_processing import ranked_search
 from query_expansion import expand_query, process_query
 from spellchecker import SpellChecker
-
-
+import pandas as pd
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -37,12 +38,11 @@ def spellcheck(query):
     corrected = " ".join(return_array)
     return corrected, misspelled
 
-
-def search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight):
+def search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight, step):
     preprocessed_query = " ".join(preprocess_content(query))
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index,
                                 starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi,diversity=diversity,
-                                fairness=fairness, pagerank_weight=pagerank_weight)
+                                fairness=fairness, pagerank_weight=pagerank_weight, step=step)
     return_object = []
     for url, content, _id, title, rank, percentile, favicon in resulting_document_urls:
         return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank), "percentile": percentile, "favicon": favicon})
@@ -100,7 +100,7 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,p
         return jsonify({"error": "rerank parameters must be less than or equal to 1 in sum"}), 400
 
     return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi),
-                         k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight))
+                         k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight), step=10)
     return jsonify(return_json), 200
 
 @app.route("/api/document/details/<string:documentId>", methods=["POST"])
@@ -149,6 +149,45 @@ def get_first_paragraph(query):
 
     return jsonify({"first_paragraph": first_paragraph}), 200
 
+# Route to get the first paragraph of the content that contains the query terms given the query and the url
+@app.route("/api/document/first-paragraph/<string:query>", methods=["GET"])
+def get_first_paragraph(query):
+    try:
+        # Get the url from the request
+        url = request.args.get('url')
+        # Call url with beautiful soup to get the description of the page
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        paragraphs_raw = [element.strip() for element in soup.stripped_strings]
+        paragraphs = [re.sub(r'[\t\n\r]', ' ', text) for text in paragraphs_raw]
+        print(paragraphs)
+        processed_query = " ".join(preprocess_content(query))
+        first_paragraph = None
+        found = False
+
+        # Go through the paragraph array and check if the query terms are in the paragraph
+        for words in processed_query.split():
+            for paragraph in paragraphs:
+                # Strip paragraph text of any :, "", ?, !, ., etc.
+                striped_text = (paragraph).lower()
+                if words in striped_text:
+                    # Only return the part of the paragraph that contains the query and 10 Characters after and add ... at the end of the string
+                    first_paragraph = paragraph[striped_text.index(words):striped_text.index(words) + 300] + "..."
+                    found = True
+                    break
+
+        
+        if found == False:
+            # Return longest paragraph
+            first_paragraph = max(paragraphs, key=len)[:300] + "..."
+
+    except Exception as e:
+        return jsonify({"error": repr(e)}), 400
+
+    return jsonify({"first_paragraph": first_paragraph}), 200
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
 
