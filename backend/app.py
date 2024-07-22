@@ -150,6 +150,38 @@ def get_first_paragraph(query):
 
     return jsonify({"first_paragraph": first_paragraph}), 200
 
+@app.route("/api/batch/<string:query_list>", methods=["GET"])
+def get_100(query_list):
+
+    query_list = query_list.split(",")
+
+    for index, query in enumerate(query_list):
+
+        return_json = search(query=query, inverted_index=inverted_index, starting_index=0, b_okapi=0.9,
+                         k1_okapi=1.5, diversity=0.2, fairness=0.4, pagerank_weight=0.2, step=100)
+
+        query_df = pd.DataFrame.from_records(return_json)
+
+        query_df.drop("title", axis="columns")
+        query_df.drop("_id", axis="columns")
+        query_df.drop("percentile", axis="columns")
+        query_df.drop("favicon", axis="columns")
+        query_df["query"] = index
+        query_df["index"] = query_df.index
+
+        order = ["query", "index", "url", "rank"]
+
+        query_df = query_df[order]
+
+        if(index == 0):
+            return_df = query_df
+        else:
+            return_df = pd.concat([return_df, query_df], ignore_index=True)
+
+    tsv_buffer = io.StringIO()
+
+    return_df.to_csv(tsv_buffer, sep='\t', index=False, header=False)
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
 
