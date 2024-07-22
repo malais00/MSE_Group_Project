@@ -6,6 +6,7 @@ Modern Search Engines Group Project Summer by Jannik Brandstetter, Julian Borbec
 - [Setup](#setup)
 - [Features](#features)
   - [Supported Parameters](#supported-parameters)
+- [Endpoints](#Endpoints)
 ## Introduction
 ### Tü-be-fair
 Introducing Tü-be-fair, our approach to a webapp search engine, following the lecture of Modern Search Engines of SS24. Our main goal was to create a search engine that incorporates user preferences into its decision-making process and aims to be as transparent as possible in its output. Users can select parameters and see how their choices affect the search results.
@@ -49,3 +50,26 @@ We use Okapi BM25 as our base ranking system, a well-established ranker used in 
 - Pagerank weight: Weighs the importance of the PageRank score
 
 Users have full control over these parameters on a per-query basis. The original, non-reranked score percentiles for each query are displayed, allowing users to see how their changes impact search results. We have also identified standard parameters that produce acceptable results for most queries.
+
+## Endpoints
+
+Endpoint to spellcheck queries, returns a json object of the following form {"corrected_query": corrected query, "misspelled": Boolean, True if the input was detected to be misspelled}
+```
+/api/query/spellcheck/<string:query>
+```
+Endpoint to search query the database, returns a list of json objects of the following form {"url": webpage url, "title": webpage title, "_id": database id of url, "rank": rank after reranking, "percentile": percentile rank of the url before reranking, "favicon": favicon url}
+```
+/api/query/<string:query>/<string:index>/okapi/<string:b_okapi>/<string:k1_okapi>/<string:diversity_okapi>/<string:fairness_okapi>/pagerank/<string:pagerank_weight>
+```
+Endpoint to get document content, returns a json object of form {"content": tokenized website content, "index_date": date at which website was indexed}
+```
+/api/document/details/<string:documentId>
+```
+Endpoint to get the first paragraph of the content that contains the query terms given the query and the url, returns a json object of form {"first_paragraph": first paragraph as string}
+```
+/api/document/first-paragraph/<string:query>
+```
+Endpoint to batch query the search engine. query_list is of the form: first search term, second search term, ... Returns a tsv file with the 100 top ranked results per query
+```
+/api/batch/<string:query_list>
+```
