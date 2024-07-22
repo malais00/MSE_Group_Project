@@ -98,7 +98,7 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,p
                          k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight))
     return jsonify(return_json), 200
 
-@app.route("/api/document/details/<string:documentId>", methods=["GET"])
+@app.route("/api/document/details/<string:documentId>", methods=["POST"])
 def get_document_content(documentId):
     try:
         content = mongoDb.getCrawledContentByIndex([ObjectId(documentId)])[0]
@@ -145,10 +145,6 @@ def get_first_paragraph(query):
         return jsonify({"error": repr(e)}), 400
 
     return jsonify({"first_paragraph": first_paragraph}), 200
-
-
-
-
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
