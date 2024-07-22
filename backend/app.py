@@ -16,6 +16,7 @@ from query_processing import ranked_search
 from query_expansion import expand_query, process_query
 from spellchecker import SpellChecker
 import pandas as pd
+import re
 
 app = Flask(__name__)
 CORS(app)
