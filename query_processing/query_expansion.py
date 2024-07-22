@@ -62,5 +62,4 @@ def expand_query(query, threshold=1):
         synonyms = get_synonyms(word)
         filtered_synonyms = filter_synonyms(word, synonyms, threshold)
         expanded_query.update(filtered_synonyms)
-    print("Expanded query \'" + query + "\' to: " + ' '.join(expanded_query))
     return ' '.join(expanded_query)

@@ -35,7 +35,6 @@ class invertedIndex():
 
         keywords_in_index = [key for key in keywords if key in self.index.keys()]
 
-        #print(keywords_in_index)
 
         if(len(keywords_in_index) == 0):
             return []
@@ -136,7 +135,5 @@ class posting_list():
         return self.count
 
 mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
-
-print(mongo_uri)
 
 mongoDb = MongoDB(mongo_uri)

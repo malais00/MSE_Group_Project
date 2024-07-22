@@ -3,6 +3,7 @@ import pymongo
 
 mongoDb = MongoDB("mongodb://localhost:27017/")
 
+# Function to remove duplicates from the database
 def removeURLDuplicates():
     cursor = list(mongoDb.db.crawled.find({}, {"url": 1, "_id": 1}))
     duplicatesCount = 0
@@ -16,6 +17,7 @@ def removeURLDuplicates():
                     print("Deleting duplicates of URL '", document, "'")
     print("Deleted '", duplicatesCount, "' duplicates (done)")
 
+# Function to check for duplicates in the database
 def checkForIdDuplicates():
     cursor = list(mongoDb.db.crawled.find({}, {"_id": 1}))
     for document in cursor:
