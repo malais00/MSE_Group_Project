@@ -47,6 +47,7 @@ We use Okapi BM25 as our base ranking system, a well-established ranker used in 
 Additionally, we also provide query spellchecking suggestions to improve search results.
 
 Tü-be-fair includes:
+- High Performance Query Search
 - Fully customizable parameters, easily adjustable by the user
 - Spell Checking for misspelled queries
 - Favicon Support
