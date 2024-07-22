@@ -65,7 +65,7 @@ with app.app_context():
     print("Constructing inverted index")
     inverted_index = invertedIndex(mongoDb)
     print("Initializing spellchecker")
-    spell_checker = SpellChecker(language="en", distance= 2)
+    spell_checker = SpellChecker(language="en", distance= 5)
     keys = list(inverted_index.index.keys())
     keys = [str(key) for key in keys]
     spell_checker.word_frequency.load_words(keys)
