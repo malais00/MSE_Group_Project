@@ -70,7 +70,6 @@ export default {
             if(currentTheme === 'customTheme') {
                 newTheme = 'customDarkTheme'
             }
-            console.log(this.theme);
             this.theme.global.name.value = newTheme;
         }
     }
@@ -105,6 +104,7 @@ function toggleTheme () {
 <style scoped lang="scss">
     .footer {
         background-color: rgb(var(--v-theme-neutral));
+        border-radius: 8px 8px 0 0;
     }
     .uniImg {
         height: 3vh;

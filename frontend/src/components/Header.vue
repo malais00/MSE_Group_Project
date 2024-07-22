@@ -16,7 +16,7 @@
                         hide-details="hide-details"
                         append-inner-icon="mdi-magnify"
                         clearable
-                        bg-color="white"
+                        bg-color="font"
                         class="searchQuery"
                         rounded="0"
                         @click:appendInner="sendSearchQuery"
@@ -46,9 +46,12 @@
                 <template v-slot:activator="{ props }">
                     <v-btn
                         v-bind="props"
+                        class="settingsBtn"
                         style="margin-left: 2%"
+                        color="font"
+                        icon
                     >
-                        <v-icon color="primary">mdi-cog</v-icon>
+                        <v-icon  color="cog">mdi-cog</v-icon>
                     </v-btn>
                 </template>
                 <v-card style="width: 25vw">
@@ -242,18 +245,23 @@ export default {
         sendSearchQuery() {
             this.$emit('search-query', this.query, this.b_okapi25_parameter, this.k1_okapi25_parameter, this.diversity_okapi25_parameter, this.fairness_okapi25_parameter, this.pagerank_weight_parameter)
         },
+
         sendSpellcheckedQuery() {
             this.query = this.correctedQuery;
             this.$emit('hide-spellchecker');
             this.sendSearchQuery();
 
         },
+
+        // Ensure that the sum of diversity and fairness is not greater than 1
         changeDiversity(value) {
             if(this.diversity_okapi25_parameter + this.fairness_okapi25_parameter > 1.0) {
                 this.fairness_okapi25_parameter = 1.0 - this.diversity_okapi25_parameter;
                 this.tradeOffDiversityFairnessWarning = true;
             }
         },
+
+        // Ensure that the sum of diversity and fairness is not greater than 1
         changeFairness(value) {
             if(this.diversity_okapi25_parameter + this.fairness_okapi25_parameter > 1.0) {
                 this.diversity_okapi25_parameter = 1.0 - this.fairness_okapi25_parameter;
@@ -276,12 +284,14 @@ export default {
     justify-content: center;
     background-color: rgb(var(--v-theme-primary));
     color: rgb(var(--v-theme-white));
+    border-radius: 0 0 8px 8px;
 }
 
 .searchQuery {
     position: relative;
     color: rgb(var(--v-theme-primary));
     z-index: 2;
+    background-color: rgb(var(--v-theme-font));;
 }
 
 .queryContainer {
@@ -292,6 +302,7 @@ export default {
 .headline {
     white-space: nowrap;
     padding: 0 2%;
+    color: rgb(var(--v-theme-white));
 }
 
 .okapiContainer {
