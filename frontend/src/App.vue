@@ -7,6 +7,7 @@
             @hide-spellchecker="showSpellchecker = false"
             :show-spellchecker="showSpellchecker"
             :corrected-query="correctedQuery"
+            :loading-results="loadingResults"
         />
 
         <v-main>

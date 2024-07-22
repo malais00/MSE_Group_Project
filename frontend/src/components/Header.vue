@@ -1,7 +1,10 @@
 <template>
     <div class="headerContainer">
         <div style="display: flex; flex-direction: row; width: 100%; height: 100%; justify-content: flex-start; align-items: center">
-            <img style="width: 150px; margin: 4px 24px" :src="logoWhite">
+            <div style="position: relative">
+                <img style="width: 150px; margin: 4px 24px" :src="logoWhite">
+                <v-icon :class="loadingResults ? 'move' : ''" class="magnifyIcon">mdi-magnify</v-icon>
+            </div>
             <div
                 class="queryContainer"
             >
@@ -223,6 +226,11 @@ export default {
             type: String,
             required: false,
             default: ''
+        },
+        loadingResults: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     data() {
@@ -390,5 +398,36 @@ export default {
     color: rgb(var(--v-theme-error));
     width: 100%;
     text-align: center;
+}
+
+.magnifyIcon {
+    position: absolute;
+    right: 39px;
+    top: 19px
+}
+
+@keyframes moveInfinity {
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(10px, -20px) rotate(10deg);
+    }
+    50% {
+        transform: translate(-75, -10px) rotate(90deg);
+    }
+    75% {
+        transform: translate(-130px, 10px) rotate(135deg);
+    }
+    90% {
+        transform: translate(-90px, 20px) rotate(135deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+.move {
+    animation: moveInfinity 5s infinite;
 }
 </style>
