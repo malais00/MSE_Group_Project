@@ -127,12 +127,12 @@ def get_first_paragraph(query):
         for words in processed_query.split():
             for paragraph in paragraphs:
                 # Strip paragraph text of any :, "", ?, !, ., etc.
-                striped_text = (paragraph.text.replace(":", "").replace("\"", "").replace("?", "").replace("!", "").replace(".", "")).lower()
+                striped_text = (paragraph.text).lower()
                 print("Paragraph: ",striped_text)
                 print("words: ", words) 
                 if words in striped_text:
                     # Only return the part of the paragraph that contains the query and 10 Characters after and add ... at the end of the string
-                    first_paragraph = striped_text[striped_text.index(words):striped_text.index(words) + 200] + "..."
+                    first_paragraph = paragraph.text[striped_text.index(words):striped_text.index(words) + 200] + "..."
                     found = True
                     break
 
@@ -144,7 +144,7 @@ def get_first_paragraph(query):
     except Exception as e:
         return jsonify({"error": repr(e)}), 400
 
-    return jsonify({"processed url": processed_query, "first_paragraph": first_paragraph}), 200
+    return jsonify({"first_paragraph": first_paragraph}), 200
 
 
 
