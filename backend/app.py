@@ -16,6 +16,7 @@ from query_processing import ranked_search
 from query_expansion import expand_query, process_query
 from spellchecker import SpellChecker
 import pandas as pd
+import re 
 
 app = Flask(__name__)
 CORS(app)
@@ -121,27 +122,27 @@ def get_first_paragraph(query):
         # Call url with beautiful soup to get the description of the page
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        containers = soup.find_all(text=True)
-        paragraphs = [container for container in containers if container.parent.name in ['p', 'div', 'span']]
+        paragraphs_raw = [element.strip() for element in soup.stripped_strings]
+        paragraphs = [re.sub(r'[\t\n\r]', ' ', text) for text in paragraphs_raw]
         processed_query = " ".join(preprocess_content(query))
-
         first_paragraph = None
         found = False
-        # Check if the query as a substring is in the paragraphs
+
+        # Go through the paragraph array and check if the query terms are in the paragraph
         for words in processed_query.split():
             for paragraph in paragraphs:
                 # Strip paragraph text of any :, "", ?, !, ., etc.
-                striped_text = (paragraph.text).lower()
+                striped_text = (paragraph).lower()
                 if words in striped_text:
                     # Only return the part of the paragraph that contains the query and 10 Characters after and add ... at the end of the string
-                    first_paragraph = paragraph.text[striped_text.index(words):striped_text.index(words) + 300] + "..."
+                    first_paragraph = paragraph[striped_text.index(words):striped_text.index(words) + 300] + "..."
                     found = True
                     break
 
         
         if found == False:
             # Return longest paragraph
-            first_paragraph = max(paragraphs, key=len).text[:300] + "..."
+            first_paragraph = max(paragraphs, key=len)[:300] + "..."
 
     except Exception as e:
         return jsonify({"error": repr(e)}), 400
@@ -176,17 +177,21 @@ def get_100(query_list):
         else:
             return_df = pd.concat([return_df, query_df], ignore_index=True)
 
+        tsv_buffer = io.StringIO()
+
+        return_df.to_csv(tsv_buffer, sep='\t', index=False, header=False)
+
+        tsv_buffer.seek(0)
+
+        response = Response(tsv_buffer.getvalue(), mimetype="text/tsv")
+
+        response.headers["Content-Disposition"] = "attachment; filename=results.tsv"
+
+        return response
+
     tsv_buffer = io.StringIO()
 
     return_df.to_csv(tsv_buffer, sep='\t', index=False, header=False)
-
-    tsv_buffer.seek(0)
-
-    response = Response(tsv_buffer.getvalue(), mimetype='text/tab-separated-values')
-
-    response.headers['Content-Disposition'] = 'attachment; filename=data.tsv'
-
-    return response, 200
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
