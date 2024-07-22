@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from bson import ObjectId
+import requests
 import sys
 import os
+from bs4 import BeautifulSoup
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../crawler'))
 from db import MongoDB
 from pre_processing import preprocess_content, preprocess_preparation
@@ -12,6 +14,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../que
 from query_processing import ranked_search
 from query_expansion import expand_query, process_query
 from spellchecker import SpellChecker
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -104,5 +108,46 @@ def get_document_content(documentId):
     response_object = {"content": content[1], "index_date": content[2]}
     return jsonify(response_object), 200
 
+# Route to get the first paragraph of the content that contains the query terms given the query and the url
+@app.route("/api/document/first-paragraph/<string:query>", methods=["GET"])
+def get_first_paragraph(query):
+    try:
+        # Get the url from the request
+        url = request.args.get('url')
+        # Call url with beautiful soup to get the description of the page
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        paragraphs = soup.find_all('p')
+
+        processed_query = " ".join(preprocess_content(query))
+
+        first_paragraph = None
+        found = False
+        # Check if the query as a substring is in the paragraphs
+        for words in processed_query.split():
+            for paragraph in paragraphs:
+                # Strip paragraph text of any :, "", ?, !, ., etc.
+                striped_text = (paragraph.text.replace(":", "").replace("\"", "").replace("?", "").replace("!", "").replace(".", "")).lower()
+                print("Paragraph: ",striped_text)
+                print("words: ", words) 
+                if words in striped_text:
+                    first_paragraph = paragraph.text
+                    found = True
+                    break
+
+        
+        if found == False:
+            first_paragraph = paragraphs[0].text
+
+    except Exception as e:
+        return jsonify({"error": repr(e)}), 400
+
+    return jsonify({"processed url": processed_query, "first_paragraph": first_paragraph}), 200
+
+
+
+
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=56000, debug=True)
+
