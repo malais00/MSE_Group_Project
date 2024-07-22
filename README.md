@@ -26,7 +26,7 @@ Navigate to the project directory:
 ```sh
 cd MSE_Group_Project
 ```
-Our project is deployed via Docker. To build it, run:
+Our project is deployed via Docker. After installing Docker the project can be build by running:
 ```sh
 docker compose build
 ```
@@ -34,6 +34,8 @@ After building, you can start the project with:
 ```sh
 docker compose up
 ```
+This may take a while. After deployment of the containers is complete, you can access the frontend on port 3000 of the hosting server.
+Please make sure that port 3000, 5000 and 27018 are free. 
 ## Features
 
 Our search engine is built upon the concepts of transparency, customizability, and performance. Just as there is no single type of user, there isn't a single set of search engine parameters that works best for everyone.
