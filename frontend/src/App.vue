@@ -65,6 +65,7 @@ export default {
         async searchQuery(query, index, b_okapi25_parameter, k1_okapi25_parameter, diversity_okapi25_parameter, fairness_okapi25_parameter, pagerank_weight_parameter, initialQuery=false) {
             if(initialQuery) {
                 this.maxDocumentsReached = false;
+                this.searchResults = [];
             }
             this.currentQueryReadOnly = query;
             this.b_okapi25_parameterReadOnly = b_okapi25_parameter;
@@ -82,6 +83,9 @@ export default {
                             this.maxDocumentsReached = true;
                         }
                         if(initialQuery) {
+                            if(res.length === 0) {
+                                this.showSnackbar('No results found for your query.', 'error');
+                            }
                             this.searchResults = res;
                         } else {
                             this.searchResults = this.searchResults.concat(res);

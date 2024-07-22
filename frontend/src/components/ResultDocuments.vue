@@ -19,6 +19,7 @@
                 <div class="docContainer">
                     <div class="percentileDiv">
                         <div class="percentileLine" :style="`bottom: ${scalePercentileLine(doc.percentile)}px`"></div>
+<!--                        <span>{{doc.percentile }}</span>-->
                     </div>
 
                     <v-divider vertical :thickness="2" style="margin-right: 12px"></v-divider>
@@ -119,14 +120,11 @@ export default {
             return '';
         },
         scalePercentileLine(percentile) {
-            if (percentile < 94) {
+            if (percentile < 25) {
                 return 0;
             }
-            // Normalize to the range [0, 6]
-            let normalizedPercentile = percentile - 94;
-            // Scale to the range [0, 100]
-            let scaledPercentile = normalizedPercentile * (100 / 6);
-            // Apply the scaling factor to get the margin
+            let normalizedPercentile = percentile - 25;
+            let scaledPercentile = normalizedPercentile * (100 / 75);
             return (scaledPercentile / 100) * 60;
         }
     }
