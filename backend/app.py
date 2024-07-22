@@ -148,46 +148,45 @@ def get_first_paragraph(query):
 
     return jsonify({"first_paragraph": first_paragraph}), 200
 
-@app.route("/api/batch/<string:query_list>", methods=["GET"])
-def get_100(query_list):
+# Route to get the first paragraph of the content that contains the query terms given the query and the url
+@app.route("/api/document/first-paragraph/<string:query>", methods=["GET"])
+def get_first_paragraph(query):
+    try:
+        # Get the url from the request
+        url = request.args.get('url')
+        # Call url with beautiful soup to get the description of the page
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        paragraphs_raw = [element.strip() for element in soup.stripped_strings]
+        paragraphs = [re.sub(r'[\t\n\r]', ' ', text) for text in paragraphs_raw]
+        print(paragraphs)
+        processed_query = " ".join(preprocess_content(query))
+        first_paragraph = None
+        found = False
 
-    query_list = query_list.split(",")
+        # Go through the paragraph array and check if the query terms are in the paragraph
+        for words in processed_query.split():
+            for paragraph in paragraphs:
+                # Strip paragraph text of any :, "", ?, !, ., etc.
+                striped_text = (paragraph).lower()
+                if words in striped_text:
+                    # Only return the part of the paragraph that contains the query and 10 Characters after and add ... at the end of the string
+                    first_paragraph = paragraph[striped_text.index(words):striped_text.index(words) + 300] + "..."
+                    found = True
+                    break
 
-    for index, query in enumerate(query_list):
+        
+        if found == False:
+            # Return longest paragraph
+            first_paragraph = max(paragraphs, key=len)[:300] + "..."
 
-        return_json = search(query=query, inverted_index=inverted_index, starting_index=0, b_okapi=0.9,
-                         k1_okapi=1.5, diversity=0.2, fairness=0.4, pagerank_weight=0.2, step=100)
+    except Exception as e:
+        return jsonify({"error": repr(e)}), 400
 
-        query_df = pd.DataFrame.from_records(return_json)
-
-        query_df.drop("title", axis="columns")
-        query_df.drop("_id", axis="columns")
-        query_df.drop("percentile", axis="columns")
-        query_df.drop("favicon", axis="columns")
-        query_df["query"] = index
-        query_df["index"] = query_df.index
-
-        order = ["query", "index", "url", "rank"]
-
-        query_df = query_df[order]
-
-        if(index == 0):
-            return_df = query_df
-        else:
-            return_df = pd.concat([return_df, query_df], ignore_index=True)
-
-    tsv_buffer = io.StringIO()
-
-    return_df.to_csv(tsv_buffer, sep='\t', index=False, header=False)
-
-    tsv_buffer.seek(0)
-
-    response = Response(tsv_buffer.getvalue(), mimetype='text/tab-separated-values')
-
-    response.headers['Content-Disposition'] = 'attachment; filename=data.tsv'
-
-    return response, 200
+    return jsonify({"first_paragraph": first_paragraph}), 200
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
 
