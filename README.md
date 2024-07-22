@@ -45,6 +45,14 @@ For example, one user might prioritize fair and diverse results when searching f
 We use Okapi BM25 as our base ranking system, a well-established ranker used in various search systems. This is further augmented by PageRank and reranking based on result diversity and fairness in document exposure.
 
 Additionally, we also provide query spellchecking suggestions to improve search results.
+
+Tü-be-fair includes:
+- Fully customizable parameters, easily adjustable by the user
+- Spell Checking for misspelled queries
+- Favicon Support
+- Transparency, with Relevance Scores Display
+- Loading of Previews of Websites over Backend Proxy
+
 ### Supported Parameters
 
 - Okapi BM25 b: Document length normalization
