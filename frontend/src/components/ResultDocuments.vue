@@ -18,8 +18,10 @@
             >
                 <div class="docContainer">
                     <div class="percentileDiv">
-                        <div class="percentileLine"></div>
+                        <div class="percentileLine" :style="`bottom: ${scalePercentileLine(doc.percentile)}px`"></div>
                     </div>
+
+                    <v-divider vertical :thickness="2" style="margin-right: 12px"></v-divider>
 
                     <div style="display: flex; flex-direction: row; align-items: center">
                         <div style="display: flex; flex-direction: column">
@@ -101,7 +103,6 @@ export default {
         },
         fetchMoreResults() {
             if (!this.loadingResults && this.searchResults.length !== 0) {
-                console.log("fetching more results: ", this.searchResults.length / 10);
                 this.$emit('fetchMoreResults', this.searchResults.length / 10);
             }
         },
@@ -116,6 +117,17 @@ export default {
                 }
             }
             return '';
+        },
+        scalePercentileLine(percentile) {
+            if (percentile < 94) {
+                return 0;
+            }
+            // Normalize to the range [0, 6]
+            let normalizedPercentile = percentile - 94;
+            // Scale to the range [0, 100]
+            let scaledPercentile = normalizedPercentile * (100 / 6);
+            // Apply the scaling factor to get the margin
+            return (scaledPercentile / 100) * 60;
         }
     }
 }
@@ -154,19 +166,20 @@ export default {
 .percentileDiv {
     position: relative;
     min-width: 12px;
-    min-height: 48px;
+    min-height: 64px;
     max-width: 12px;
-    max-height: 48px;
-    background: linear-gradient(to bottom, green, red);
+    max-height: 64px;
+    margin-right: 18px;
+    background: linear-gradient(to bottom, #00be00, rgb(var(--v-theme-primary)));
     border-radius: 25px;
     border: 1px solid black;
 }
 
 .percentileLine {
     position: absolute;
-    min-width: 11px;
+    min-width: 19px;
     min-height: 2px;
-    bottom: 12px;
+    left: -4px;
     background: black;
 }
 </style>
