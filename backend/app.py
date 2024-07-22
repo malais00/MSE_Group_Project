@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from bson import ObjectId
 import requests
 import sys
 import os
+import io
 from bs4 import BeautifulSoup
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../crawler'))
 from db import MongoDB
@@ -14,8 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../que
 from query_processing import ranked_search
 from query_expansion import expand_query, process_query
 from spellchecker import SpellChecker
-
-
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -37,12 +37,11 @@ def spellcheck(query):
     corrected = " ".join(return_array)
     return corrected, misspelled
 
-
-def search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight):
+def search(query, inverted_index, starting_index, b_okapi, k1_okapi, diversity, fairness, pagerank_weight, step):
     preprocessed_query = " ".join(preprocess_content(query))
     resulting_document_urls = ranked_search(query=preprocessed_query, inverted_index=inverted_index,
                                 starting_index=starting_index, b_okapi=b_okapi, k1_okapi=k1_okapi,diversity=diversity,
-                                fairness=fairness, pagerank_weight=pagerank_weight)
+                                fairness=fairness, pagerank_weight=pagerank_weight, step=step)
     return_object = []
     for url, content, _id, title, rank, percentile, favicon in resulting_document_urls:
         return_object.append({"url": url, "title": title, "_id": str(_id), "rank": str(rank), "percentile": percentile, "favicon": favicon})
@@ -100,7 +99,7 @@ def get_query(query, index, b_okapi, k1_okapi, diversity_okapi, fairness_okapi,p
         return jsonify({"error": "rerank parameters must be less than or equal to 1 in sum"}), 400
 
     return_json = search(query=query, inverted_index=inverted_index, starting_index=int(index), b_okapi=float(b_okapi),
-                         k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight))
+                         k1_okapi=float(k1_okapi), diversity=float(diversity_okapi), fairness=float(fairness_okapi), pagerank_weight=float(pagerank_weight), step=10)
     return jsonify(return_json), 200
 
 @app.route("/api/document/details/<string:documentId>", methods=["POST"])
@@ -148,6 +147,46 @@ def get_first_paragraph(query):
         return jsonify({"error": repr(e)}), 400
 
     return jsonify({"first_paragraph": first_paragraph}), 200
+
+@app.route("/api/batch/<string:query_list>", methods=["GET"])
+def get_100(query_list):
+
+    query_list = query_list.split(",")
+
+    for index, query in enumerate(query_list):
+
+        return_json = search(query=query, inverted_index=inverted_index, starting_index=0, b_okapi=0.9,
+                         k1_okapi=1.5, diversity=0.2, fairness=0.4, pagerank_weight=0.2, step=100)
+
+        query_df = pd.DataFrame.from_records(return_json)
+
+        query_df.drop("title", axis="columns")
+        query_df.drop("_id", axis="columns")
+        query_df.drop("percentile", axis="columns")
+        query_df.drop("favicon", axis="columns")
+        query_df["query"] = index
+        query_df["index"] = query_df.index
+
+        order = ["query", "index", "url", "rank"]
+
+        query_df = query_df[order]
+
+        if(index == 0):
+            return_df = query_df
+        else:
+            return_df.append(query_df, ignore_index=True)
+
+    tsv_buffer = io.StringIO()
+
+    return_df.to_csv(tsv_buffer, sep='\t', index=False, header=False)
+
+    tsv_buffer.seek(0)
+
+    response = Response(tsv_buffer.getvalue(), mimetype='text/tab-separated-values')
+
+    response.headers['Content-Disposition'] = 'attachment; filename=data.tsv'
+
+    return response, 200
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

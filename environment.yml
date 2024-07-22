@@ -61,5 +61,6 @@ dependencies:
   - xz=5.2.6
   - yarl=1.9.4
   - zipp=3.19.2
+  - pandas
   - pip:
       - pyspellchecker==0.8.1
