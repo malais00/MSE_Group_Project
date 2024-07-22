@@ -38,14 +38,11 @@ class MongoDB:
         try:
             self.db.create_collection("crawled", validator={"$jsonSchema": schema})
         except pymongo.errors.CollectionInvalid:
-            print("Collection already exists, no need to create collection: crawled.")
+            pass
         try:
             self.db.create_collection("queue")
         except pymongo.errors.CollectionInvalid:
-            print("Collection already exists, no need to create collection: queue.")
-
-        # self.createFrontier()
-
+            pass
         
     def savePage(self, url, title, content, date, links, favicon):
         document = {"url": url, "title": title, "content": content, "indexDate": date, "links": links, "favicon": favicon}

@@ -119,7 +119,6 @@ def get_first_paragraph(query):
         soup = BeautifulSoup(response.text, 'html.parser')
         containers = soup.find_all(text=True)
         paragraphs = [container for container in containers if container.parent.name in ['p', 'div', 'span']]
-        print("Paragraphs: ", paragraphs)
         processed_query = " ".join(preprocess_content(query))
 
         first_paragraph = None
