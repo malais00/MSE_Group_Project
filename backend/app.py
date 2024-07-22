@@ -177,6 +177,14 @@ def get_100(query_list):
         else:
             return_df = pd.concat([return_df, query_df], ignore_index=True)
 
+        tsv_buffer.seek(0)
+
+        response = Response(tsv_buffer.getvalue(), mimetype="text/tsv")
+
+        response.headers["Content-Disposition"] = "attachment; filename=results.tsv"
+
+        return response
+
     tsv_buffer = io.StringIO()
 
     return_df.to_csv(tsv_buffer, sep='\t', index=False, header=False)
